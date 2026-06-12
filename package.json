@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node scripts/run-tests.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",

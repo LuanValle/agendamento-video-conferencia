@@ -1,9 +1,59 @@
 import { Link } from 'react-router-dom'
+import { useCallback, useState } from 'react'
 import Dashboard from '../components/Dashboard'
+import { apiToRequest } from '../utils/apiMappers'
 import { getRequestSummary } from '../utils/requestUtils'
+import { useSmartPolling } from '../utils/useSmartPolling'
 
 function AdminDashboard() {
-  const summary = getRequestSummary()
+  const [summary, setSummary] = useState({
+    total: 0,
+    pending: 0,
+    completed: 0,
+    expired: 0,
+    today: 0,
+    highPriority: 0,
+  })
+  const [error, setError] = useState('')
+  const [status, setStatus] = useState({
+    database: 'verificando',
+    lastUpdatedAt: null,
+    pending: 0,
+    today: 0,
+  })
+
+  const fetchSummary = useCallback(async () => {
+    try {
+      setError('')
+
+      // Busca as solicitacoes no banco para montar os numeros do painel.
+      const response = await fetch('/api/solicitacoes')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Nao foi possivel carregar o painel.')
+      }
+
+      const requests = (result.data || []).map(apiToRequest)
+      const nextSummary = getRequestSummary(requests)
+
+      setSummary(nextSummary)
+      setStatus({
+        database: 'conectado',
+        lastUpdatedAt: new Date(),
+        pending: nextSummary.pending,
+        today: nextSummary.today,
+      })
+    } catch (error) {
+      setError(error.message)
+      setStatus((current) => ({
+        ...current,
+        database: 'erro',
+      }))
+    }
+  }, [])
+
+  useSmartPolling(fetchSummary, 5000)
 
   return (
     <section>
@@ -13,7 +63,32 @@ function AdminDashboard() {
           <h1>Painel administrativo</h1>
         </div>
       </div>
+      {error && <div className="error-message">{error}</div>}
       <Dashboard summary={summary} />
+      <section className="status-panel" aria-label="Status do sistema">
+        <article>
+          <span>Banco</span>
+          <strong className={status.database === 'conectado' ? 'status-ok' : 'status-error'}>
+            {status.database}
+          </strong>
+        </article>
+        <article>
+          <span>Última atualização</span>
+          <strong>
+            {status.lastUpdatedAt
+              ? status.lastUpdatedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              : '--:--'}
+          </strong>
+        </article>
+        <article>
+          <span>Pendentes</span>
+          <strong>{status.pending}</strong>
+        </article>
+        <article>
+          <span>Solicitações de hoje</span>
+          <strong>{status.today}</strong>
+        </article>
+      </section>
       <div className="admin-shortcuts">
         <Link className="entry-card" to="/admin/solicitacoes">
           <strong>Solicitações pendentes</strong>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
+import SiteFooter from './components/SiteFooter'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminLayout from './pages/AdminLayout'
 import AdminLogin from './pages/AdminLogin'
@@ -11,6 +12,14 @@ import PendingRequests from './pages/PendingRequests'
 import RejectedRequests from './pages/RejectedRequests'
 import SolicitationPage from './pages/SolicitationPage'
 
+/**
+ * Arquivo central de rotas do sistema.
+ *
+ * Ele define quais telas aparecem para cada URL:
+ * - rotas publicas: inicio, solicitacao e login;
+ * - rotas administrativas: ficam dentro do ProtectedRoute;
+ * - rota coringa: mostra uma pagina de erro quando a URL nao existe.
+ */
 function App() {
   return (
     <BrowserRouter>
@@ -18,6 +27,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/solicitar" element={<SolicitationPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
+
         <Route
           path="/admin"
           element={
@@ -32,9 +42,11 @@ function App() {
           <Route path="rejeitadas" element={<RejectedRequests />} />
           <Route path="todas" element={<AllRequests />} />
         </Route>
+
         <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <SiteFooter />
     </BrowserRouter>
   )
 }

@@ -1,3 +1,11 @@
+/**
+ * Utilitarios de data da agenda.
+ *
+ * O sistema guarda datas no formato do input HTML: YYYY-MM-DD.
+ * Sempre que uma data precisa virar objeto Date, adicionamos horario fixo
+ * para evitar diferencas de fuso horario no navegador.
+ */
+
 export const combineDateAndTime = (date, time) => {
   if (!date || !time) return null
   return new Date(`${date}T${time}:00`)
@@ -20,6 +28,7 @@ export const isToday = (date) => calculateDaysRemaining(date) === 0
 
 export const isExpired = (conference) => {
   if (conference.completed) return false
+
   const schedule = combineDateAndTime(conference.date, conference.time)
   return schedule ? schedule.getTime() < new Date().getTime() : false
 }
@@ -52,6 +61,7 @@ export const isWithinNext30Days = (date) => {
 
 export const formatDatePtBr = (date) => {
   if (!date) return ''
+
   return new Intl.DateTimeFormat('pt-BR', {
     weekday: 'short',
     day: '2-digit',
@@ -60,6 +70,7 @@ export const formatDatePtBr = (date) => {
   }).format(new Date(`${date}T12:00:00`))
 }
 
+// Texto curto mostrado no card da videoconferencia.
 export const getDateStatusText = (conference) => {
   if (conference.completed) return 'Concluída'
   if (isExpired(conference)) return 'Vencida'
@@ -71,6 +82,7 @@ export const getDateStatusText = (conference) => {
   return 'Vencida'
 }
 
+// Classe CSS usada para colorir cards conforme proximidade e situacao.
 export const getVisualClassByProximity = (conference) => {
   if (conference.completed) return 'status-completed'
   if (isExpired(conference)) return 'status-expired'
@@ -88,6 +100,7 @@ export const getSituation = (conference) => {
   return 'pendente'
 }
 
+// Mantem pendentes primeiro, ordenadas por data/hora, e concluidas no final.
 export const sortByDateAndTime = (conferences) =>
   [...conferences].sort((a, b) => {
     if (a.completed !== b.completed) return a.completed ? 1 : -1

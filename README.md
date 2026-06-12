@@ -1,179 +1,80 @@
 # agendamento-video-conferencia
 
+Sistema de agendamento de videoconferencias criado com React, Vite, Vercel Functions e banco Neon Postgres.
+
 ## Rotas principais
 
-- `/`: tela inicial com as op??es **Solicitar videoconfer?ncia** e **Login**.
-- `/solicitar`: formul?rio p?blico para enviar uma solicita??o.
-- `/admin/login`: login administrativo tempor?rio.
+- `/`: tela inicial com as opcoes **Solicitar videoconferencia** e **Login**.
+- `/solicitar`: formulario publico para enviar uma solicitacao.
+- `/admin/login`: login administrativo.
 - `/admin`: painel administrativo protegido.
-- `/admin/solicitacoes`: solicita??es pendentes.
+- `/admin/solicitacoes`: solicitacoes pendentes.
 - `/admin/agenda`: agenda aprovada.
-- `/admin/rejeitadas`: solicita??es rejeitadas.
-- `/admin/todas`: hist?rico completo de solicita??es.
+- `/admin/rejeitadas`: solicitacoes rejeitadas.
+- `/admin/todas`: historico completo de solicitacoes.
 
-## Login administrativo tempor?rio
+## Login administrativo
 
-```text
-Usu?rio: admin
-Senha: Luk35kyw@1k3r
-```
+O login administrativo e validado pela API em `/api/admin-login`.
 
-Esse login ? tempor?rio e serve apenas como barreira visual. A senha est? no frontend e n?o representa seguran?a real. Para produ??o real, use Firebase Authentication e configure regras de seguran?a adequadas no Firestore para proteger leitura e escrita.
+Configure as credenciais somente por variaveis de ambiente:
 
-Sistema simples de agendamento de videoconferências criado com React e Vite, sem backend e com persistência local no navegador.
+- `ADMIN_USER`: usuario administrativo. Se omitido, usa `admin`.
+- `ADMIN_PASSWORD`: senha administrativa obrigatoria.
+- `ADMIN_SESSION_SECRET`: segredo usado para assinar a sessao HTTP-only. Se omitido, usa `ADMIN_PASSWORD`.
+- `DATABASE_URL`: conexao Postgres do Neon.
 
-## Descrição
-
-O **Agendador de Videoconferências** organiza reuniões de trabalho por data, horário, prioridade, responsável, setor e urgência visual. A interface foi pensada para uso em ambiente corporativo, com dashboard, filtros, busca, cards responsivos e recursos de backup.
-
-## Objetivo
-
-Centralizar uma agenda local de videoconferências, destacando reuniões próximas, vencidas, concluídas e prioridades altas ou críticas.
+Nao coloque senhas, tokens ou strings de conexao reais no GitHub. Depois de qualquer exposicao publica, gere novas credenciais no provedor e atualize as variaveis no ambiente local e na Vercel.
 
 ## Funcionalidades
 
-- Modo telão para exibir somente a agenda de videoconferências em tela grande.
+- Formulario publico para solicitar videoconferencias.
+- Painel administrativo para aprovar ou rejeitar solicitacoes.
+- Agenda de videoconferencias aprovadas.
+- Cadastro, edicao, exclusao, conclusao e reabertura de videoconferencias.
+- Busca, filtros, dashboard, exportacao CSV, backup JSON e impressao.
+- Persistencia em Postgres via Neon.
 
-- Cadastro de videoconferências com validação de campos obrigatórios.
-- Edição, exclusão com confirmação, conclusão e reabertura de reuniões.
-- Ordenação automática por data e horário.
-- Status textual: faltam dias, é hoje, vencida ou concluída.
-- Cores por proximidade da data e prioridade visual em badges.
-- Busca por nome, plataforma, responsável, setor e observações.
-- Filtros por situação, prioridade e períodos.
-- Dashboard com total, pendentes, concluídas, vencidas, reuniões de hoje e prioridades Alta/Crítica.
-- Persistência em `localStorage`.
-- Dados iniciais apenas na primeira execução.
-- Exportação e importação de backup em JSON.
-- Exportação em CSV compatível com Excel/LibreOffice.
-- Modo de impressão com agenda limpa.
-- Layout responsivo para desktop, notebook, tablet e celular.
-
-## Tecnologias usadas
-
-- React
-- Vite
-- JavaScript
-- CSS puro
-- localStorage
-- lucide-react para ícones leves
-
-## Estrutura de pastas
+## Estrutura principal
 
 ```text
 src/
   pages/
-    HomePage.jsx
-    SolicitationPage.jsx
-    AdminLogin.jsx
-    AdminDashboard.jsx
-    PendingRequests.jsx
-    ApprovedAgenda.jsx
-    RejectedRequests.jsx
-    AllRequests.jsx
-    NotFound.jsx
-
   components/
-    ProtectedRoute.jsx
-    Header.jsx
-    Dashboard.jsx
-    ConferenceForm.jsx
-    ConferenceList.jsx
-    ConferenceCard.jsx
-    Filters.jsx
-    SearchBar.jsx
-    BackupActions.jsx
-    EmptyState.jsx
-
   utils/
-    dateUtils.js
-    storage.js
-    exportUtils.js
-    validationUtils.js
-
-  data/
-    initialConferences.js
-
   styles/
-    global.css
-
+api/
+  admin-login.js
+  solicitacoes.js
+  videoconferencias.js
   App.jsx
   main.jsx
 ```
 
-## Como rodar localmente
+## Configuracao local
+
+Crie um arquivo `.env.local` a partir de `.env.example` e preencha os valores reais:
 
 ```bash
-npm install
-npm run dev
+cp .env.example .env.local
 ```
-
-Depois acesse a URL exibida pelo Vite, normalmente `http://localhost:5173`.
 
 ## Como fazer build
 
 ```bash
+npm install
 npm run build
 ```
 
-O build final será gerado na pasta `dist/`.
+O build final sera gerado na pasta `dist/`.
 
-## Como rodar os testes
+## Deploy na Vercel
 
-```bash
-npm test
-```
+Configure as variaveis `DATABASE_URL`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET` e, se necessario, `ADMIN_USER` no projeto da Vercel.
 
-Os testes cobrem regras de data, status, ordenação, validação do formulário, validação do backup JSON e geração do CSV.
+Use as configuracoes padrao:
 
-## Como subir na Vercel
+- Build Command: `npm run build`
+- Output Directory: `dist`
 
-1. Envie o projeto para um repositório Git.
-2. Importe o repositório na Vercel.
-3. Use as configurações padrão de Vite:
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-4. Faça o deploy.
-
-## Uso do localStorage
-
-As videoconferências são salvas no navegador usando `localStorage`. Isso permite que os dados continuem disponíveis após atualizar a página, sem necessidade de backend. Os dados ficam restritos ao navegador e ao dispositivo usado.
-
-## Backup JSON
-
-O botão **Exportar backup** gera um arquivo `backup-videoconferencias.json` com todas as reuniões cadastradas. O botão **Importar backup** permite restaurar um arquivo JSON válido e substituir os dados atuais após confirmação.
-
-## Exportação CSV
-
-O botão **Exportar CSV** gera uma planilha em formato `.csv` com as colunas:
-
-- Nome
-- Local/Plataforma
-- Data
-- Horário
-- Prioridade
-- Responsável
-- Setor
-- Link
-- Status
-- Situação
-- Observações
-
-O arquivo usa separador `;` e BOM UTF-8 para melhor compatibilidade com Excel e LibreOffice.
-
-## Limitações da versão sem backend
-
-- Os dados não são sincronizados entre dispositivos.
-- Não há controle de usuários ou autenticação.
-- A perda dos dados do navegador pode remover a agenda local.
-- Backups precisam ser exportados manualmente para restauração futura.
-
-## Possíveis melhorias futuras
-
-- Sincronização com backend próprio.
-- Controle de usuários e permissões.
-- Notificações antes das reuniões.
-- Integração com calendários externos.
-- Importação de CSV.
-- Histórico de alterações.
-- Campos personalizados por setor.
+O arquivo `vercel.json` preserva as rotas `/api/*` e redireciona as demais rotas do app para `index.html`.

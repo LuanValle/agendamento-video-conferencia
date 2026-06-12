@@ -5,6 +5,7 @@ const downloadFile = (content, fileName, type) => {
   const blob = new Blob([content], { type })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
+
   link.href = url
   link.download = fileName
   document.body.appendChild(link)
@@ -33,11 +34,13 @@ export const importJsonBackup = (file) =>
     reader.onload = () => {
       try {
         const parsed = JSON.parse(reader.result)
+
         if (!validateBackupStructure(parsed)) {
           reject(new Error('Backup JSON inválido ou com estrutura incompatível.'))
           return
         }
 
+        // Normaliza dados antigos de backup para garantir todos os campos usados pela tela.
         resolve(
           parsed.map((item) => ({
             id: item.id || crypto.randomUUID(),

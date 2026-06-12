@@ -1,35 +1,99 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import RejectModal from '../components/RejectModal'
 import RequestCard from '../components/RequestCard'
-import { loadConferences, saveConferences } from '../utils/storage'
-import { loadRequests, updateRequestStatus } from '../utils/requestStorage'
-import { requestToConference } from '../utils/requestUtils'
+import { apiToRequest } from '../utils/apiMappers'
 
 function PendingRequests() {
-  const [requests, setRequests] = useState(() => loadRequests())
+  const [requests, setRequests] = useState([])
   const [rejecting, setRejecting] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [actionLoadingId, setActionLoadingId] = useState(null)
+  const [isRejecting, setIsRejecting] = useState(false)
 
-  const pending = requests.filter((request) => request.status === 'pendente')
+  const fetchRequests = async () => {
+    try {
+      setLoading(true)
+      setError('')
 
-  const approveRequest = (request) => {
-    const conferences = loadConferences()
-    saveConferences([
-      ...conferences,
-      {
-        ...requestToConference(request),
-        id: crypto.randomUUID(),
-        completed: false,
-        createdAt: new Date().toISOString(),
-        requestId: request.id,
-      },
-    ])
-    setRequests(updateRequestStatus(request.id, 'aprovada'))
+      // Carrega as solicitações reais do banco por meio da API.
+      const response = await fetch('/api/solicitacoes')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Não foi possível carregar as solicitações.')
+      }
+
+      setRequests((result.data || []).map(apiToRequest))
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const rejectRequest = (reason) => {
-    setRequests(updateRequestStatus(rejecting.id, 'rejeitada', { rejectionReason: reason }))
-    setRejecting(null)
+  useEffect(() => {
+    fetchRequests()
+  }, [])
+
+  const pendingRequests = requests.filter((request) => request.status === 'pendente')
+
+  const approveRequest = async (request) => {
+    if (actionLoadingId) return
+
+    try {
+      setError('')
+      setActionLoadingId(request.id)
+
+      const response = await fetch(`/api/solicitacoes/${request.id}/aprovar`, {
+        method: 'PATCH',
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Não foi possível aprovar a solicitação.')
+      }
+
+      await fetchRequests()
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setActionLoadingId(null)
+    }
+  }
+
+  const rejectRequest = async (reason) => {
+    if (!rejecting || isRejecting) return
+
+    try {
+      setError('')
+      setIsRejecting(true)
+
+      const response = await fetch(`/api/solicitacoes/${rejecting.id}/rejeitar`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          motivo_rejeicao: reason,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Não foi possível rejeitar a solicitação.')
+      }
+
+      setRejecting(null)
+      await fetchRequests()
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setIsRejecting(false)
+    }
   }
 
   return (
@@ -40,16 +104,33 @@ function PendingRequests() {
           <h1>Solicitações pendentes</h1>
         </div>
       </div>
-      {pending.length ? (
+
+      {error && <div className="error-message">{error}</div>}
+      {loading && <div className="loading-message">Carregando solicitações...</div>}
+
+      {!loading && pendingRequests.length ? (
         <div className="conference-list">
-          {pending.map((request) => (
-            <RequestCard key={request.id} request={request} onApprove={approveRequest} onReject={setRejecting} />
+          {pendingRequests.map((request) => (
+            <RequestCard
+              key={request.id}
+              request={request}
+              onApprove={approveRequest}
+              onReject={setRejecting}
+              actionLoadingId={actionLoadingId}
+            />
           ))}
         </div>
       ) : (
-        <EmptyState hasConferences={false} />
+        !loading && <EmptyState hasConferences={false} />
       )}
-      {rejecting && <RejectModal onConfirm={rejectRequest} onCancel={() => setRejecting(null)} />}
+
+      {rejecting && (
+        <RejectModal
+          onConfirm={rejectRequest}
+          onCancel={() => setRejecting(null)}
+          isLoading={isRejecting}
+        />
+      )}
     </section>
   )
 }

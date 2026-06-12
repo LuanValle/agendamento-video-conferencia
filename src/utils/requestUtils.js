@@ -1,19 +1,22 @@
 import { isToday } from './dateUtils.js'
-import { loadRequests } from './requestStorage.js'
 
-export const getRequestSummary = () => {
-  const requests = loadRequests()
-
-  return {
-    total: requests.length,
-    pending: requests.filter((request) => request.status === 'pendente').length,
-    completed: requests.filter((request) => request.status === 'aprovada').length,
-    expired: requests.filter((request) => request.status === 'rejeitada').length,
-    today: requests.filter((request) => isToday(request.date)).length,
-    highPriority: requests.filter((request) => ['Alta', 'Crítica'].includes(request.priority)).length,
-  }
+const isHighPriority = (priority) => {
+  // Remove acentos para contar prioridades criticas mesmo quando vierem com grafias diferentes.
+  const normalized = String(priority || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return ['Alta', 'Critica'].includes(normalized)
 }
 
+// Monta os numeros exibidos no dashboard administrativo usando dados vindos do banco.
+export const getRequestSummary = (requests) => ({
+  total: requests.length,
+  pending: requests.filter((request) => request.status === 'pendente').length,
+  completed: requests.filter((request) => request.status === 'aprovada').length,
+  expired: requests.filter((request) => request.status === 'rejeitada').length,
+  today: requests.filter((request) => isToday(request.date)).length,
+  highPriority: requests.filter((request) => isHighPriority(request.priority)).length,
+})
+
+// Converte uma solicitacao publica aprovada em uma videoconferencia da agenda.
 export const requestToConference = (request) => ({
   name: request.conferenceName,
   platform: request.platform,

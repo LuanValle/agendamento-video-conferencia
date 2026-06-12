@@ -1,7 +1,9 @@
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { formatDatePtBr } from '../utils/dateUtils'
 
-function RequestCard({ request, onApprove, onReject }) {
+function RequestCard({ request, onApprove, onReject, actionLoadingId }) {
+  const isActionLoading = actionLoadingId === request.id
+
   return (
     <article className={`request-card request-${request.status}`}>
       <div className="card-topline">
@@ -44,13 +46,23 @@ function RequestCard({ request, onApprove, onReject }) {
       {request.notes && <p className="notes">{request.notes}</p>}
       {request.rejectionReason && <p className="notes rejection-reason">Motivo: {request.rejectionReason}</p>}
 
-      {request.status === 'pendente' && (
+      {request.status === 'pendente' && onApprove && onReject && (
         <div className="card-actions">
-          <button className="icon-button success" type="button" onClick={() => onApprove(request)}>
+          <button
+            className="icon-button success"
+            type="button"
+            onClick={() => onApprove(request)}
+            disabled={isActionLoading}
+          >
             <CheckCircle2 size={17} />
-            <span>Aprovar</span>
+            <span>{isActionLoading ? 'Aprovando...' : 'Aprovar'}</span>
           </button>
-          <button className="icon-button danger" type="button" onClick={() => onReject(request)}>
+          <button
+            className="icon-button danger"
+            type="button"
+            onClick={() => onReject(request)}
+            disabled={isActionLoading}
+          >
             <XCircle size={17} />
             <span>Rejeitar</span>
           </button>

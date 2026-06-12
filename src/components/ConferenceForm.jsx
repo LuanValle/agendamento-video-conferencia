@@ -1,31 +1,40 @@
-import { Save, X } from 'lucide-react'
+import { Save, X } from "lucide-react";
+import { normalizeSector } from "../utils/formatters";
 
 const emptyForm = {
-  name: '',
-  platform: '',
-  date: '',
-  time: '',
-  priority: '',
-  responsible: '',
-  department: '',
-  link: '',
-  notes: '',
-}
+  name: "",
+  platform: "",
+  date: "",
+  time: "",
+  priority: "",
+  responsible: "",
+  department: "",
+  link: "",
+  notes: "",
+};
 
-const platforms = ['Google Meet', 'Microsoft Teams', 'Zoom', 'Webex', 'UNA', 'Presencial', 'Outro']
-const priorities = ['Baixa', 'Média', 'Alta', 'Crítica']
+const platforms = [
+  "Google Meet",
+  "Microsoft Teams",
+  "Zoom",
+  "Webex",
+  "UNA",
+  "Presencial",
+  "Outro",
+];
+const priorities = ["Baixa", "Média", "Alta", "Crítica"];
 
 const fields = {
-  name: 'conference-name',
-  platform: 'conference-platform',
-  date: 'conference-date',
-  time: 'conference-time',
-  priority: 'conference-priority',
-  responsible: 'conference-responsible',
-  department: 'conference-department',
-  link: 'conference-link',
-  notes: 'conference-notes',
-}
+  name: "conference-name",
+  platform: "conference-platform",
+  date: "conference-date",
+  time: "conference-time",
+  priority: "conference-priority",
+  responsible: "conference-responsible",
+  department: "conference-department",
+  link: "conference-link",
+  notes: "conference-notes",
+};
 
 function ConferenceForm({
   formData,
@@ -34,19 +43,22 @@ function ConferenceForm({
   isEditing,
   onSubmit,
   onCancelEdit,
+  isSaving,
 }) {
   const updateField = (field, value) => {
-    setFormData((current) => ({ ...current, [field]: value }))
-  }
+    setFormData((current) => ({ ...current, [field]: value }));
+  };
 
-  const data = formData || emptyForm
+  const data = formData || emptyForm;
 
   return (
     <section className="panel no-print" aria-labelledby="form-title">
       <div className="section-heading">
         <div>
           <p className="eyebrow">Cadastro</p>
-          <h2 id="form-title">{isEditing ? 'Editar videoconferência' : 'Nova videoconferência'}</h2>
+          <h2 id="form-title">
+            {isEditing ? "Editar videoconferência" : "Nova videoconferência"}
+          </h2>
         </div>
         {isEditing && (
           <button className="button ghost" type="button" onClick={onCancelEdit}>
@@ -62,11 +74,13 @@ function ConferenceForm({
           <input
             id={fields.name}
             value={data.name}
-            onChange={(event) => updateField('name', event.target.value)}
+            onChange={(event) => updateField("name", event.target.value)}
             placeholder="Ex.: Reunião de alinhamento"
             aria-describedby={errors.name ? `${fields.name}-error` : undefined}
           />
-          {errors.name && <small id={`${fields.name}-error`}>{errors.name}</small>}
+          {errors.name && (
+            <small id={`${fields.name}-error`}>{errors.name}</small>
+          )}
         </div>
 
         <div className="form-field">
@@ -74,8 +88,10 @@ function ConferenceForm({
           <select
             id={fields.platform}
             value={data.platform}
-            onChange={(event) => updateField('platform', event.target.value)}
-            aria-describedby={errors.platform ? `${fields.platform}-error` : undefined}
+            onChange={(event) => updateField("platform", event.target.value)}
+            aria-describedby={
+              errors.platform ? `${fields.platform}-error` : undefined
+            }
           >
             <option value="">Selecione</option>
             {platforms.map((platform) => (
@@ -84,7 +100,9 @@ function ConferenceForm({
               </option>
             ))}
           </select>
-          {errors.platform && <small id={`${fields.platform}-error`}>{errors.platform}</small>}
+          {errors.platform && (
+            <small id={`${fields.platform}-error`}>{errors.platform}</small>
+          )}
         </div>
 
         <div className="form-field">
@@ -93,10 +111,12 @@ function ConferenceForm({
             id={fields.date}
             type="date"
             value={data.date}
-            onChange={(event) => updateField('date', event.target.value)}
+            onChange={(event) => updateField("date", event.target.value)}
             aria-describedby={errors.date ? `${fields.date}-error` : undefined}
           />
-          {errors.date && <small id={`${fields.date}-error`}>{errors.date}</small>}
+          {errors.date && (
+            <small id={`${fields.date}-error`}>{errors.date}</small>
+          )}
         </div>
 
         <div className="form-field">
@@ -105,10 +125,12 @@ function ConferenceForm({
             id={fields.time}
             type="time"
             value={data.time}
-            onChange={(event) => updateField('time', event.target.value)}
+            onChange={(event) => updateField("time", event.target.value)}
             aria-describedby={errors.time ? `${fields.time}-error` : undefined}
           />
-          {errors.time && <small id={`${fields.time}-error`}>{errors.time}</small>}
+          {errors.time && (
+            <small id={`${fields.time}-error`}>{errors.time}</small>
+          )}
         </div>
 
         <div className="form-field">
@@ -116,8 +138,10 @@ function ConferenceForm({
           <select
             id={fields.priority}
             value={data.priority}
-            onChange={(event) => updateField('priority', event.target.value)}
-            aria-describedby={errors.priority ? `${fields.priority}-error` : undefined}
+            onChange={(event) => updateField("priority", event.target.value)}
+            aria-describedby={
+              errors.priority ? `${fields.priority}-error` : undefined
+            }
           >
             <option value="">Selecione</option>
             {priorities.map((priority) => (
@@ -126,7 +150,9 @@ function ConferenceForm({
               </option>
             ))}
           </select>
-          {errors.priority && <small id={`${fields.priority}-error`}>{errors.priority}</small>}
+          {errors.priority && (
+            <small id={`${fields.priority}-error`}>{errors.priority}</small>
+          )}
         </div>
 
         <div className="form-field">
@@ -134,7 +160,7 @@ function ConferenceForm({
           <input
             id={fields.responsible}
             value={data.responsible}
-            onChange={(event) => updateField('responsible', event.target.value)}
+            onChange={(event) => updateField("responsible", event.target.value)}
           />
         </div>
 
@@ -143,7 +169,7 @@ function ConferenceForm({
           <input
             id={fields.department}
             value={data.department}
-            onChange={(event) => updateField('department', event.target.value)}
+            onChange={(event) => updateField("department", normalizeSector(event.target.value))}
           />
         </div>
 
@@ -152,11 +178,13 @@ function ConferenceForm({
           <input
             id={fields.link}
             value={data.link}
-            onChange={(event) => updateField('link', event.target.value)}
+            onChange={(event) => updateField("link", event.target.value)}
             placeholder="https://..."
             aria-describedby={errors.link ? `${fields.link}-error` : undefined}
           />
-          {errors.link && <small id={`${fields.link}-error`}>{errors.link}</small>}
+          {errors.link && (
+            <small id={`${fields.link}-error`}>{errors.link}</small>
+          )}
         </div>
 
         <div className="form-field full-width">
@@ -164,22 +192,26 @@ function ConferenceForm({
           <textarea
             id={fields.notes}
             value={data.notes}
-            onChange={(event) => updateField('notes', event.target.value)}
+            onChange={(event) => updateField("notes", event.target.value)}
             rows="4"
             placeholder="Pauta, materiais necessários ou contexto da reunião."
           />
         </div>
 
         <div className="form-actions full-width">
-          <button className="button primary" type="submit">
+          <button className="button primary" type="submit" disabled={isSaving}>
             <Save size={18} />
-            {isEditing ? 'Salvar alterações' : 'Adicionar'}
+            {isSaving
+              ? "Salvando..."
+              : isEditing
+                ? "Salvar alterações"
+                : "Adicionar"}
           </button>
         </div>
       </form>
     </section>
-  )
+  );
 }
 
-export { emptyForm }
-export default ConferenceForm
+export { emptyForm };
+export default ConferenceForm;

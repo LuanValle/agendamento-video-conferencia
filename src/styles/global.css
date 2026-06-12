@@ -26,6 +26,10 @@ body {
   min-width: 320px;
 }
 
+#root {
+  min-height: 100vh;
+}
+
 a {
   color: inherit;
 }
@@ -102,6 +106,44 @@ button {
 
 .admin-shortcuts {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.status-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 18px;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.status-panel article {
+  border-radius: 8px;
+  background: #f8fbfd;
+  padding: 12px;
+}
+
+.status-panel span {
+  display: block;
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-panel strong {
+  display: block;
+  margin-top: 4px;
+  color: #172033;
+  font-size: 1.05rem;
+}
+
+.status-ok {
+  color: #087443 !important;
+}
+
+.status-error {
+  color: #b42318 !important;
 }
 
 .entry-card {
@@ -199,6 +241,25 @@ button {
   text-decoration: none;
 }
 
+.admin-nav a span:not(.pending-badge) {
+  min-width: 0;
+}
+
+.pending-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  margin-left: auto;
+  border-radius: 999px;
+  background: #d92d20;
+  color: #ffffff;
+  padding: 0 7px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .admin-nav a.active,
 .admin-nav a:hover {
   background: #e8f3fb;
@@ -209,6 +270,20 @@ button {
   width: min(1240px, calc(100% - 32px));
   margin: 0 auto;
   padding: 28px 0 52px;
+}
+
+.site-footer {
+  border-top: 1px solid #dce3ee;
+  background: #ffffff;
+  color: #667085;
+  padding: 14px 18px;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.site-footer strong {
+  color: #172033;
 }
 
 .app-header {
@@ -261,7 +336,8 @@ main {
 
 .summary-card,
 .panel,
-.agenda-panel {
+.agenda-panel,
+.status-panel {
   background: var(--surface);
   border: 1px solid rgba(220, 227, 238, 0.9);
   box-shadow: var(--shadow);
@@ -318,6 +394,14 @@ main {
 
 .agenda-panel {
   margin-top: 20px;
+}
+
+.last-updated {
+  display: inline-block;
+  margin-top: 6px;
+  color: #667085;
+  font-size: 0.86rem;
+  font-weight: 800;
 }
 
 .section-heading,
@@ -747,6 +831,99 @@ dd {
   line-height: 1;
 }
 
+.fullscreen-request-card {
+  display: none;
+}
+
+.body-presentation-mode .fullscreen-request-card {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 80;
+  display: grid;
+  gap: 12px;
+  width: min(440px, calc(100% - 36px));
+  border: 1px solid #d9e2ee;
+  border-left-width: 8px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  padding: 14px;
+  box-shadow: 0 18px 40px rgba(27, 39, 58, 0.24);
+}
+
+.fullscreen-request-card.priority-low {
+  border-left-color: #16a34a;
+}
+
+.fullscreen-request-card.priority-medium {
+  border-left-color: #f59e0b;
+}
+
+.fullscreen-request-card.priority-high {
+  border-left-color: #f97316;
+}
+
+.fullscreen-request-card.priority-critical {
+  border-left-color: #d92d20;
+}
+
+.fullscreen-request-card strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.fullscreen-request-card p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-weight: 800;
+}
+
+.fullscreen-request-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.fullscreen-request-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #d92d20;
+  color: #ffffff;
+  padding: 0 8px;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.fullscreen-request-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+  margin: 0;
+}
+
+.fullscreen-request-details dt {
+  font-size: 0.68rem;
+}
+
+.fullscreen-request-details dd {
+  margin-top: 3px;
+  font-size: 0.84rem;
+}
+
+.fullscreen-request-notes {
+  border-top: 1px solid #e4e9f2;
+  padding-top: 10px;
+}
+
+.fullscreen-request-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .error-message,
 .success-message,
 .state-box {
@@ -870,6 +1047,10 @@ dd {
   padding: 0;
 }
 
+.body-presentation-mode .site-footer {
+  display: none;
+}
+
 .presentation-mode .app-header,
 .presentation-mode .dashboard,
 .presentation-mode .toast,
@@ -956,6 +1137,10 @@ dd {
     grid-template-columns: 1fr;
   }
 
+  .status-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .conference-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1005,7 +1190,8 @@ dd {
   }
 
   .conference-form,
-  .conference-details {
+  .conference-details,
+  .status-panel {
     grid-template-columns: 1fr;
   }
 

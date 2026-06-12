@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function RejectModal({ onConfirm, onCancel }) {
+function RejectModal({ onConfirm, onCancel, isLoading }) {
   const [reason, setReason] = useState('')
 
   return (
@@ -17,11 +17,11 @@ function RejectModal({ onConfirm, onCancel }) {
           />
         </label>
         <div className="modal-actions">
-          <button className="button ghost" type="button" onClick={onCancel}>
+          <button className="button ghost" type="button" onClick={onCancel} disabled={isLoading}>
             Cancelar
           </button>
-          <button className="button danger-button" type="button" onClick={() => onConfirm(reason.trim())}>
-            Rejeitar
+          <button className="button danger-button" type="button" onClick={() => onConfirm(reason.trim())} disabled={isLoading}>
+            {isLoading ? 'Rejeitando...' : 'Rejeitar'}
           </button>
         </div>
       </div>

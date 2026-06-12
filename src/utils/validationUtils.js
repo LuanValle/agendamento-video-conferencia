@@ -6,6 +6,19 @@ const requiredFields = [
   ['priority', 'Prioridade é obrigatória.'],
 ]
 
+const validPriorities = ['Baixa', 'Média', 'Alta', 'Crítica']
+const validPlatforms = ['Google Meet', 'Microsoft Teams', 'Zoom', 'Webex', 'UNA', 'Presencial', 'Outro']
+
+const isPastDate = (value) => {
+  if (!value) return false
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const date = new Date(`${value}T00:00:00`)
+  return Number.isNaN(date.getTime()) || date < today
+}
+
 export const isValidUrl = (value) => {
   if (!value) return true
 
@@ -17,6 +30,7 @@ export const isValidUrl = (value) => {
   }
 }
 
+// Valida o formulário de cadastro/edição de videoconferências da agenda.
 export const validateConference = (conference) => {
   const errors = {}
 
@@ -24,15 +38,16 @@ export const validateConference = (conference) => {
     if (!conference[field]?.trim()) errors[field] = message
   })
 
+  if (conference.date && isPastDate(conference.date)) {
+    errors.date = 'A data não pode ser anterior à data atual.'
+  }
+
   if (conference.link?.trim() && !isValidUrl(conference.link.trim())) {
     errors.link = 'Informe uma URL válida começando com http:// ou https://.'
   }
 
   return errors
 }
-
-const validPriorities = ['Baixa', 'Média', 'Alta', 'Crítica']
-const validPlatforms = ['Google Meet', 'Microsoft Teams', 'Zoom', 'Webex', 'UNA', 'Presencial', 'Outro']
 
 const isStringOrMissing = (value) => value === undefined || typeof value === 'string'
 const isBooleanOrMissing = (value) => value === undefined || typeof value === 'boolean'
@@ -66,5 +81,6 @@ const isValidConferenceShape = (item) => {
   )
 }
 
+// Garante que um backup importado tem a estrutura esperada antes de usar seus dados.
 export const validateBackupStructure = (data) =>
   Array.isArray(data) && data.every(isValidConferenceShape)

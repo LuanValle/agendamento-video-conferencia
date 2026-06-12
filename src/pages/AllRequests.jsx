@@ -1,9 +1,39 @@
+import { useEffect, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import RequestCard from '../components/RequestCard'
-import { loadRequests } from '../utils/requestStorage'
+import { apiToRequest } from '../utils/apiMappers'
+
 
 function AllRequests() {
-  const requests = loadRequests()
+  const [requests, setRequests] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true)
+      setError('')
+
+      // Busca o historico completo diretamente no banco, por meio da API.
+      const response = await fetch('/api/solicitacoes')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Nao foi possivel carregar as solicitacoes.')
+      }
+
+      // Traduz os nomes do banco para os nomes que o componente RequestCard usa.
+      setRequests((result.data || []).map(apiToRequest))
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRequests()
+  }, [])
 
   return (
     <section>
@@ -13,14 +43,18 @@ function AllRequests() {
           <h1>Todas as solicitações</h1>
         </div>
       </div>
-      {requests.length ? (
+
+      {error && <div className="error-message">{error}</div>}
+      {loading && <div className="loading-message">Carregando solicitacoes...</div>}
+
+      {!loading && requests.length ? (
         <div className="conference-list">
           {requests.map((request) => (
             <RequestCard key={request.id} request={request} />
           ))}
         </div>
       ) : (
-        <EmptyState hasConferences={false} />
+        !loading && <EmptyState hasConferences={false} />
       )}
     </section>
   )

@@ -1,0 +1,51 @@
+// Converte uma solicitacao recebida da API/banco para o formato usado pelos componentes React.
+// O banco usa nomes em portugues; a interface usa nomes mais curtos em ingles.
+export const apiToRequest = (item) => ({
+  id: item.id,
+  name: item.nome,
+  nip: item.nip,
+  department: item.setor,
+  contact: item.contato,
+  conferenceName: item.nome_videoconferencia,
+  platform: item.local_plataforma,
+  date: item.data?.slice(0, 10) || '',
+  time: item.horario?.slice(0, 5) || '',
+  priority: item.prioridade,
+  link: item.link || '',
+  notes: item.observacoes || '',
+  status: item.status,
+  rejectionReason: item.motivo_rejeicao || '',
+  createdAt: item.criado_em,
+  updatedAt: item.atualizado_em,
+})
+
+// Converte uma videoconferencia recebida da API/banco para o formato usado na agenda.
+export const apiToConference = (item) => ({
+  id: item.id,
+  name: item.nome,
+  platform: item.plataforma,
+  date: item.data?.slice(0, 10) || '',
+  time: item.horario?.slice(0, 5) || '',
+  priority: item.prioridade,
+  responsible: item.responsavel || '',
+  department: item.setor || '',
+  link: item.link || '',
+  notes: item.observacoes || '',
+  completed: Boolean(item.concluida),
+  createdAt: item.criado_em,
+  updatedAt: item.atualizado_em,
+})
+
+// Converte os dados do formulario da agenda para os nomes esperados pela API/banco.
+export const conferenceToApi = (conference) => ({
+  nome: conference.name,
+  plataforma: conference.platform,
+  data: conference.date,
+  horario: conference.time,
+  prioridade: conference.priority,
+  responsavel: conference.responsible,
+  setor: conference.department,
+  link: conference.link,
+  observacoes: conference.notes,
+  concluida: Boolean(conference.completed),
+})

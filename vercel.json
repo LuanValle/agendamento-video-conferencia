@@ -1,4 +1,7 @@
 {
+  "regions": [
+    "gru1"
+  ],
   "rewrites": [
     {
       "source": "/((?!api/.*|@vite/.*|@react-refresh|src/.*|node_modules/.*|assets/.*).*)",

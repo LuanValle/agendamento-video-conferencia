@@ -53,7 +53,7 @@ function AdminDashboard() {
     }
   }, [])
 
-  useSmartPolling(fetchSummary, 5000)
+  useSmartPolling(fetchSummary, 30000)
 
   return (
     <section>

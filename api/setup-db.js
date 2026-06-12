@@ -38,6 +38,23 @@ export default async function handler(request, response) {
             criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             atualizado_em TIMESTAMP
         )`
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_solicitacoes_status_criado
+            ON solicitacoes (status, criado_em DESC)
+        `
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_solicitacoes_duplicidade_pendente
+            ON solicitacoes (nip, nome_videoconferencia, data, horario)
+            WHERE status = 'pendente'
+        `
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_videoconferencias_agenda
+            ON videoconferencias (concluida, data, horario)
+        `
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_videoconferencias_duplicidade
+            ON videoconferencias (nome, plataforma, data, horario)
+        `
 
         return response.status(200).json({
             status: 'ok',

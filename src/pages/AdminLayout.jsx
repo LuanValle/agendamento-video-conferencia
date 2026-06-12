@@ -41,7 +41,7 @@ function AdminLayout() {
     }
   }, [])
 
-  useSmartPolling(fetchPendingRequests, 5000)
+  useSmartPolling(fetchPendingRequests, 30000)
 
   const handleLogout = async () => {
     // Limpa a sessão visual e também pede para a API remover o cookie administrativo.

@@ -95,7 +95,7 @@ function ApprovedAgenda() {
   }, [])
 
   // Atualiza enquanto a aba esta ativa e força uma busca ao voltar para a aba.
-  useSmartPolling(fetchConferences, 5000)
+  useSmartPolling(fetchConferences, 30000)
 
   useEffect(() => {
     // O modo telao troca classes globais para esconder controles e focar na agenda.

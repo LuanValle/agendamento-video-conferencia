@@ -7,22 +7,40 @@ const getDateGroupTitle = (date) => {
   return isToday(date) ? `Hoje - ${formatted}` : formatted
 }
 
+const sortBySchedule = (a, b) => {
+  return combineDateAndTime(a.date, a.time) - combineDateAndTime(b.date, b.time)
+}
+
 const groupConferencesByDate = (conferences) => {
-  const groups = conferences.reduce((accumulator, conference) => {
+  const pendingConferences = conferences.filter((conference) => !conference.completed)
+  const completedConferences = conferences.filter((conference) => conference.completed)
+
+  const dateGroups = pendingConferences.reduce((accumulator, conference) => {
     const existing = accumulator.get(conference.date) || []
     accumulator.set(conference.date, [...existing, conference])
     return accumulator
   }, new Map())
 
-  return [...groups.entries()]
+  const groups = [...dateGroups.entries()]
     .sort(([dateA], [dateB]) => new Date(`${dateA}T12:00:00`) - new Date(`${dateB}T12:00:00`))
     .map(([date, items]) => ({
+      key: date,
       date,
-      items: [...items].sort((a, b) => {
-        if (a.completed !== b.completed) return a.completed ? 1 : -1
-        return combineDateAndTime(a.date, a.time) - combineDateAndTime(b.date, b.time)
-      }),
+      title: getDateGroupTitle(date),
+      items: [...items].sort(sortBySchedule),
     }))
+
+  if (completedConferences.length) {
+    groups.push({
+      key: 'completed',
+      date: null,
+      title: 'Concluidas',
+      isCompletedGroup: true,
+      items: [...completedConferences].sort(sortBySchedule),
+    })
+  }
+
+  return groups
 }
 
 function ConferenceList({ conferences, hasConferences, actions = {} }) {
@@ -33,16 +51,20 @@ function ConferenceList({ conferences, hasConferences, actions = {} }) {
   const groupedConferences = groupConferencesByDate(conferences)
 
   return (
-    <section className="conference-list" aria-label="Lista de videoconferências">
+    <section className="conference-list" aria-label="Lista de videoconferencias">
       {groupedConferences.map((group) => (
-        <section className="date-group" key={group.date} aria-label={`Videoconferências de ${formatDatePtBr(group.date)}`}>
+        <section
+          className={group.isCompletedGroup ? 'date-group completed-group' : 'date-group'}
+          key={group.key}
+          aria-label={group.isCompletedGroup ? 'Videoconferencias concluidas' : `Videoconferencias de ${formatDatePtBr(group.date)}`}
+        >
           <header className="date-group-header">
             <div>
-              <p className="eyebrow">Data</p>
-              <h3>{getDateGroupTitle(group.date)}</h3>
+              <p className="eyebrow">{group.isCompletedGroup ? 'Finalizadas' : 'Data'}</p>
+              <h3>{group.title}</h3>
             </div>
             <span>
-              {group.items.length} {group.items.length === 1 ? 'videoconferência' : 'videoconferências'}
+              {group.items.length} {group.items.length === 1 ? 'videoconferencia' : 'videoconferencias'}
             </span>
           </header>
           <div className="date-group-items">

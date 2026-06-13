@@ -1,6 +1,6 @@
 import { CalendarPlus, LogIn } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import sisvcLogo from '../assets/sisvc.png'
+import sisvcLogo from '../assets/sisvc-logo.jpg'
 
 function HomePage() {
   return (

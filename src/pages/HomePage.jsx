@@ -1,12 +1,16 @@
 import { CalendarPlus, LogIn } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import sisvcLogo from '../assets/sisvc.png'
 
 function HomePage() {
   return (
     <main className="entry-page">
       <section className="entry-hero">
         <p className="eyebrow">Sistema corporativo</p>
-        <h1>Agendador de Videoconferências</h1>
+        <div className="entry-brand">
+          <h1>Agendador de Videoconferências</h1>
+          <img src={sisvcLogo} alt="SisVC" />
+        </div>
         <p>Solicite videoconferências ou acesse o painel administrativo.</p>
 
         <div className="entry-actions">

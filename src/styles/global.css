@@ -80,6 +80,25 @@ button {
   text-align: center;
 }
 
+.entry-brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2.4vw, 24px);
+  justify-content: space-between;
+}
+
+.entry-brand h1 {
+  min-width: 0;
+}
+
+.entry-brand img {
+  width: clamp(74px, 12vw, 118px);
+  max-width: 24%;
+  height: auto;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
 .entry-hero h1,
 .login-panel h1,
 .solicitation-page h1,
@@ -1208,6 +1227,16 @@ dd {
   .agenda-heading,
   .card-topline {
     flex-direction: column;
+  }
+
+  .entry-brand {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .entry-brand img {
+    width: 84px;
+    max-width: 36%;
   }
 
   .backup-actions,

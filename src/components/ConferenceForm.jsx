@@ -132,7 +132,7 @@ function ConferenceForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor={fields.endDate}>Data final</label>
+          <label htmlFor={fields.endDate}>Data final (opcional)</label>
           <input
             id={fields.endDate}
             type="date"
@@ -184,7 +184,7 @@ function ConferenceForm({
         {!isEditing && (
           <>
             <div className="form-field">
-              <label htmlFor={fields.recurrenceType}>Repetir</label>
+              <label htmlFor={fields.recurrenceType}>Repetir (opcional)</label>
               <select
                 id={fields.recurrenceType}
                 value={data.recurrenceType}

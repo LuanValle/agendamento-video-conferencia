@@ -6,12 +6,16 @@ function HomePage() {
   return (
     <main className="entry-page">
       <section className="entry-hero">
-        <p className="eyebrow">Sistema corporativo</p>
         <div className="entry-brand">
-          <h1>Agendador de Videoconferências</h1>
-          <img src={sisvcLogo} alt="SisVC" />
+          <div className="entry-brand-copy">
+            <p className="eyebrow">Sistema corporativo</p>
+            <h1>Agendador de Videoconferências</h1>
+            <p>Solicite videoconferências ou acesse o painel administrativo.</p>
+          </div>
+          <div className="entry-logo-frame" aria-hidden="true">
+            <img src={sisvcLogo} alt="" />
+          </div>
         </div>
-        <p>Solicite videoconferências ou acesse o painel administrativo.</p>
 
         <div className="entry-actions">
           <Link className="entry-card" to="/solicitar">

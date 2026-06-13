@@ -96,7 +96,7 @@ function ApprovedAgenda() {
   }, [])
 
   // Atualiza enquanto a aba esta ativa e força uma busca ao voltar para a aba.
-  useSmartPolling(fetchConferences, 5000)
+  useSmartPolling(fetchConferences, 10000)
 
   useEffect(() => {
     const refreshConferences = () => fetchConferences()

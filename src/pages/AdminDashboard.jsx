@@ -54,7 +54,7 @@ function AdminDashboard() {
     }
   }, [])
 
-  useSmartPolling(fetchSummary, 5000)
+  useSmartPolling(fetchSummary, 10000)
 
   useEffect(() => {
     const refreshSummary = () => fetchSummary()

@@ -38,7 +38,7 @@ function AdminLayout() {
     }
   }, [])
 
-  useSmartPolling(fetchPendingRequests, 5000)
+  useSmartPolling(fetchPendingRequests, 10000)
 
   useEffect(() => {
     const refreshPendingRequests = () => fetchPendingRequests()

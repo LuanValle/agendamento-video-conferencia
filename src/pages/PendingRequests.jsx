@@ -6,7 +6,7 @@ import { apiToRequest } from '../utils/apiMappers'
 import { notifyAgendaChanged, notifyRequestsChanged, REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
 
-const pollingAfterInitialLoad = { intervalMs: 5000, runImmediately: false }
+const pollingAfterInitialLoad = { intervalMs: 10000, runImmediately: false }
 
 function PendingRequests() {
   const [requests, setRequests] = useState([])

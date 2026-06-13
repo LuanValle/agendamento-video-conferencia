@@ -71,6 +71,15 @@ if ((adminUser && adminPassword) || adminSessionSecret) {
   assert(pending.status === 200, `Esperava filtro de pendentes 200, recebeu ${pending.status}`)
   assert(Array.isArray(pending.body?.data), 'Filtro de pendentes deve retornar data como array.')
 
+  const paginated = await request('/api/solicitacoes?limit=2&offset=0', {
+    headers: { Cookie: cookie },
+  })
+  assert(paginated.status === 200, `Esperava pagina de solicitacoes 200, recebeu ${paginated.status}`)
+  assert(Array.isArray(paginated.body?.data), 'Pagina de solicitacoes deve retornar data como array.')
+  assert(paginated.body?.data.length <= 2, 'Pagina de solicitacoes deve respeitar o limit.')
+  assert(typeof paginated.body?.meta?.total === 'number', 'Pagina de solicitacoes deve retornar meta.total.')
+  assert(paginated.body?.meta?.limit === 2, 'Pagina de solicitacoes deve retornar meta.limit correto.')
+
   const invalidStatus = await request('/api/solicitacoes?status=invalido', {
     headers: { Cookie: cookie },
   })

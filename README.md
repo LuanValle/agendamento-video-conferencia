@@ -10,6 +10,7 @@ O projeto usa React, Vite, Vercel Functions e Neon Postgres. Nao usa Firebase.
 - Banco de dados: Neon Postgres via `DATABASE_URL`
 - Deploy: Vercel
 - Repositorio conectado ao deploy automatico: `LuanValle/agendamento-video-conferencia`
+- Regiao: Vercel `gru1` e Neon `sa-east-1`, ambos em Sao Paulo
 
 Sempre que houver push no GitHub, a Vercel dispara um novo deploy do projeto.
 
@@ -45,7 +46,7 @@ Sempre que houver push no GitHub, a Vercel dispara um novo deploy do projeto.
 - `/api/setup-db`: prepara as tabelas do banco.
 - `/api/admin-login`: autentica o administrador.
 - `/api/admin-logout`: encerra a sessao administrativa.
-- `/api/solicitacoes`: cria e lista solicitacoes.
+- `/api/solicitacoes`: cria e lista solicitacoes. Aceita `status`, `limit` e `offset` para filtros e paginacao.
 - `/api/solicitacoes/:id/aprovar`: aprova uma solicitacao.
 - `/api/solicitacoes/:id/rejeitar`: rejeita uma solicitacao.
 - `/api/videoconferencias`: cria e lista videoconferencias.

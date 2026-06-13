@@ -16,9 +16,16 @@ const camposObrigatorios = [
 ]
 
 const statusPermitidos = new Set(['pendente', 'aprovada', 'rejeitada'])
+const MAX_LIMIT = 100
 
 function temCampoObrigatorioVazio(dados) {
     return camposObrigatorios.some((campo) => !dados[campo] || !String(dados[campo]).trim())
+}
+
+function parsePositiveInteger(value, fallback) {
+    const parsed = Number.parseInt(value, 10)
+    if (!Number.isFinite(parsed) || parsed < 0) return fallback
+    return parsed
 }
 
 async function listarSolicitacoes(request, response) {
@@ -26,10 +33,55 @@ async function listarSolicitacoes(request, response) {
     if (requireAdmin(request, response)) return
 
     const status = String(request.query?.status || '').trim().toLowerCase()
+    const shouldPaginate =
+        request.query?.limit !== undefined ||
+        request.query?.offset !== undefined
+    const limit = Math.min(parsePositiveInteger(request.query?.limit, 20), MAX_LIMIT)
+    const offset = parsePositiveInteger(request.query?.offset, 0)
 
     if (status && !statusPermitidos.has(status)) {
         return response.status(400).json({
             error: 'Status invalido para filtro de solicitacoes.',
+        })
+    }
+
+    if (shouldPaginate) {
+        const [{ total }] = status
+            ? await sql`
+                SELECT COUNT(*)::int AS total
+                FROM solicitacoes
+                WHERE status = ${status}
+            `
+            : await sql`
+                SELECT COUNT(*)::int AS total
+                FROM solicitacoes
+            `
+
+        const solicitacoes = status
+            ? await sql`
+                SELECT *
+                FROM solicitacoes
+                WHERE status = ${status}
+                ORDER BY criado_em DESC
+                LIMIT ${limit}
+                OFFSET ${offset}
+            `
+            : await sql`
+                SELECT *
+                FROM solicitacoes
+                ORDER BY criado_em DESC
+                LIMIT ${limit}
+                OFFSET ${offset}
+            `
+
+        return response.status(200).json({
+            data: solicitacoes,
+            meta: {
+                total,
+                limit,
+                offset,
+                hasMore: offset + solicitacoes.length < total,
+            },
         })
     }
 

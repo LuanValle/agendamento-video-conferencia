@@ -169,12 +169,14 @@ button {
   display: grid;
   gap: 10px;
   min-height: 168px;
+  min-width: 0;
   border: 1px solid #d9e2ee;
   border-radius: 8px;
   background: #f8fbfd;
   color: #172033;
   padding: 24px;
   text-decoration: none;
+  overflow: hidden;
 }
 
 .entry-card:hover {
@@ -184,10 +186,14 @@ button {
 
 .entry-card strong {
   font-size: 1.2rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .entry-card span {
   color: var(--text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .login-panel {
@@ -348,7 +354,7 @@ main {
 
 .dashboard {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -363,12 +369,18 @@ main {
 }
 
 .summary-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   min-height: 94px;
-  padding: 18px;
+  min-width: 0;
+  padding: 18px clamp(14px, 1.6vw, 18px);
   border-radius: 8px;
+}
+
+.summary-card > div {
+  min-width: 0;
 }
 
 .summary-icon {
@@ -387,11 +399,17 @@ main {
   color: #152238;
   font-size: 1.8rem;
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .summary-card span:last-child {
+  display: block;
+  margin-top: 4px;
   color: var(--text-muted);
   font-size: 0.9rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .summary-expired .summary-icon,

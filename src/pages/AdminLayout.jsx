@@ -26,17 +26,13 @@ function AdminLayout() {
 
   const fetchPendingRequests = useCallback(async () => {
     try {
-      const response = await fetch('/api/solicitacoes')
+      const response = await fetch('/api/solicitacoes?status=pendente')
       const result = await response.json()
 
       if (!response.ok) return
 
       // Mantém somente as solicitações pendentes para alimentar o badge e o card do modo telão.
-      setPendingRequests(
-        (result.data || [])
-          .map(apiToRequest)
-          .filter((request) => request.status === 'pendente'),
-      )
+      setPendingRequests((result.data || []).map(apiToRequest))
     } catch {
       // Se a checagem falhar, o sistema tenta novamente no próximo ciclo.
     }

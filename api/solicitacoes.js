@@ -15,6 +15,8 @@ const camposObrigatorios = [
     'prioridade',
 ]
 
+const statusPermitidos = new Set(['pendente', 'aprovada', 'rejeitada'])
+
 function temCampoObrigatorioVazio(dados) {
     return camposObrigatorios.some((campo) => !dados[campo] || !String(dados[campo]).trim())
 }
@@ -23,11 +25,26 @@ async function listarSolicitacoes(request, response) {
     // Listar solicitacoes e uma acao administrativa, por isso exige login.
     if (requireAdmin(request, response)) return
 
-    const solicitacoes = await sql`
-        SELECT *
-        FROM solicitacoes
-        ORDER BY criado_em DESC
-    `
+    const status = String(request.query?.status || '').trim().toLowerCase()
+
+    if (status && !statusPermitidos.has(status)) {
+        return response.status(400).json({
+            error: 'Status invalido para filtro de solicitacoes.',
+        })
+    }
+
+    const solicitacoes = status
+        ? await sql`
+            SELECT *
+            FROM solicitacoes
+            WHERE status = ${status}
+            ORDER BY criado_em DESC
+        `
+        : await sql`
+            SELECT *
+            FROM solicitacoes
+            ORDER BY criado_em DESC
+        `
 
     return response.status(200).json({
         data: solicitacoes,

@@ -6,6 +6,8 @@ import { apiToRequest } from '../utils/apiMappers'
 import { notifyAgendaChanged, notifyRequestsChanged, REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
 
+const pollingAfterInitialLoad = { intervalMs: 5000, runImmediately: false }
+
 function PendingRequests() {
   const [requests, setRequests] = useState([])
   const [rejecting, setRejecting] = useState(null)
@@ -20,7 +22,7 @@ function PendingRequests() {
       setError('')
 
       // Carrega as solicitações reais do banco por meio da API.
-      const response = await fetch('/api/solicitacoes')
+      const response = await fetch('/api/solicitacoes?status=pendente')
       const result = await response.json()
 
       if (!response.ok) {
@@ -39,14 +41,14 @@ function PendingRequests() {
     fetchRequests({ showLoading: true })
   }, [fetchRequests])
 
-  useSmartPolling(fetchRequests, 5000)
+  useSmartPolling(fetchRequests, pollingAfterInitialLoad)
 
   useEffect(() => {
     const refreshRequests = () => fetchRequests()
     return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshRequests)
   }, [fetchRequests])
 
-  const pendingRequests = requests.filter((request) => request.status === 'pendente')
+  const pendingRequests = requests
 
   const approveRequest = async (request) => {
     if (actionLoadingId) return

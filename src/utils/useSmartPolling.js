@@ -1,36 +1,63 @@
 import { useEffect } from 'react'
 
-export function useSmartPolling(callback, intervalMs = 5000) {
+export function useSmartPolling(callback, options = 5000) {
   useEffect(() => {
-    let intervalId
+    const config =
+      typeof options === 'number'
+        ? { intervalMs: options }
+        : options
+
+    const {
+      intervalMs = 5000,
+      runImmediately = true,
+    } = config
+
+    let timeoutId
     let isStopped = false
     let isRunning = false
 
+    const schedule = () => {
+      if (isStopped) return
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(run, intervalMs)
+    }
+
     const run = async () => {
-      if (document.hidden || isRunning || isStopped) return
+      if (document.hidden || isRunning || isStopped || navigator.onLine === false) {
+        schedule()
+        return
+      }
 
       try {
         isRunning = true
         await callback()
       } finally {
         isRunning = false
+        schedule()
       }
     }
 
     // Executa ao entrar na tela e depois respeita se a aba estiver ativa.
-    run()
-    intervalId = setInterval(run, intervalMs)
-
-    const handleVisibilityChange = () => {
+    if (runImmediately) {
       run()
+    } else {
+      schedule()
     }
 
-    document.addEventListener('visibilitychange', handleVisibilityChange)
+    const runWhenAvailable = () => {
+      if (!document.hidden) run()
+    }
+
+    document.addEventListener('visibilitychange', runWhenAvailable)
+    window.addEventListener('focus', runWhenAvailable)
+    window.addEventListener('online', runWhenAvailable)
 
     return () => {
       isStopped = true
-      clearInterval(intervalId)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      clearTimeout(timeoutId)
+      document.removeEventListener('visibilitychange', runWhenAvailable)
+      window.removeEventListener('focus', runWhenAvailable)
+      window.removeEventListener('online', runWhenAvailable)
     }
-  }, [callback, intervalMs])
+  }, [callback, options])
 }

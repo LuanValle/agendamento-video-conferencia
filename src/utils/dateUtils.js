@@ -24,16 +24,34 @@ export const calculateDaysRemaining = (date) => {
   return Math.round(diff / (1000 * 60 * 60 * 24))
 }
 
-export const isToday = (date) => calculateDaysRemaining(date) === 0
+const endOfDay = (date) => {
+  const value = new Date(date)
+  value.setHours(23, 59, 59, 999)
+  return value
+}
+
+export const isToday = (date, endDate = '') => {
+  const today = startOfDay(new Date())
+  const start = startOfDay(new Date(`${date}T00:00:00`))
+  const end = endOfDay(new Date(`${endDate || date}T00:00:00`))
+  return today >= start && today <= end
+}
 
 export const isExpired = (conference) => {
   if (conference.completed) return false
+
+  if (conference.endDate && conference.endDate !== conference.date) {
+    const periodEnd = endOfDay(new Date(`${conference.endDate}T00:00:00`))
+    return periodEnd.getTime() < new Date().getTime()
+  }
 
   const schedule = combineDateAndTime(conference.date, conference.time)
   return schedule ? schedule.getTime() < new Date().getTime() : false
 }
 
-export const isWithinCurrentWeek = (date) => {
+const rangesOverlap = (startA, endA, startB, endB) => startA <= endB && endA >= startB
+
+export const isWithinCurrentWeek = (date, endDate = '') => {
   const now = new Date()
   const day = now.getDay()
   const mondayOffset = day === 0 ? -6 : 1 - day
@@ -44,19 +62,27 @@ export const isWithinCurrentWeek = (date) => {
   sunday.setDate(monday.getDate() + 6)
   sunday.setHours(23, 59, 59, 999)
 
-  const target = new Date(`${date}T12:00:00`)
-  return target >= monday && target <= sunday
+  const start = startOfDay(new Date(`${date}T00:00:00`))
+  const end = endOfDay(new Date(`${endDate || date}T00:00:00`))
+  return rangesOverlap(start, end, monday, sunday)
 }
 
-export const isWithinCurrentMonth = (date) => {
+export const isWithinCurrentMonth = (date, endDate = '') => {
   const now = new Date()
-  const target = new Date(`${date}T12:00:00`)
-  return target.getFullYear() === now.getFullYear() && target.getMonth() === now.getMonth()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const monthEnd = endOfDay(new Date(now.getFullYear(), now.getMonth() + 1, 0))
+  const start = startOfDay(new Date(`${date}T00:00:00`))
+  const end = endOfDay(new Date(`${endDate || date}T00:00:00`))
+  return rangesOverlap(start, end, monthStart, monthEnd)
 }
 
-export const isWithinNext30Days = (date) => {
-  const days = calculateDaysRemaining(date)
-  return days >= 0 && days <= 30
+export const isWithinNext30Days = (date, endDate = '') => {
+  const today = startOfDay(new Date())
+  const limit = endOfDay(new Date())
+  limit.setDate(limit.getDate() + 30)
+  const start = startOfDay(new Date(`${date}T00:00:00`))
+  const end = endOfDay(new Date(`${endDate || date}T00:00:00`))
+  return rangesOverlap(start, end, today, limit)
 }
 
 export const formatDatePtBr = (date) => {
@@ -70,13 +96,18 @@ export const formatDatePtBr = (date) => {
   }).format(new Date(`${date}T12:00:00`))
 }
 
+export const formatDateRangePtBr = (date, endDate = '') => {
+  if (!endDate || endDate === date) return formatDatePtBr(date)
+  return `${formatDatePtBr(date)} a ${formatDatePtBr(endDate)}`
+}
+
 // Texto curto mostrado no card da videoconferencia.
 export const getDateStatusText = (conference) => {
   if (conference.completed) return 'Concluída'
   if (isExpired(conference)) return 'Vencida'
+  if (isToday(conference.date, conference.endDate)) return 'É hoje'
 
   const days = calculateDaysRemaining(conference.date)
-  if (days === 0) return 'É hoje'
   if (days === 1) return 'Falta 1 dia'
   if (days > 1) return `Faltam ${days} dias`
   return 'Vencida'
@@ -88,7 +119,7 @@ export const getVisualClassByProximity = (conference) => {
   if (isExpired(conference)) return 'status-expired'
 
   const days = calculateDaysRemaining(conference.date)
-  if (days === 0) return 'status-today'
+  if (isToday(conference.date, conference.endDate)) return 'status-today'
   if (days >= 1 && days <= 3) return 'status-urgent'
   if (days >= 4 && days <= 7) return 'status-warning'
   return 'status-neutral'

@@ -5,12 +5,15 @@ const emptyForm = {
   name: "",
   platform: "",
   date: "",
+  endDate: "",
   time: "",
   priority: "",
   responsible: "",
   department: "",
   link: "",
   notes: "",
+  recurrenceType: "none",
+  repeatUntil: "",
 };
 
 const platforms = [
@@ -23,17 +26,26 @@ const platforms = [
   "Outro",
 ];
 const priorities = ["Baixa", "Média", "Alta", "Crítica"];
+const recurrenceOptions = [
+  { value: "none", label: "Não repetir" },
+  { value: "weekly", label: "Semanal" },
+  { value: "biweekly", label: "Quinzenal" },
+  { value: "monthly", label: "Mensal" },
+];
 
 const fields = {
   name: "conference-name",
   platform: "conference-platform",
   date: "conference-date",
+  endDate: "conference-end-date",
   time: "conference-time",
   priority: "conference-priority",
   responsible: "conference-responsible",
   department: "conference-department",
   link: "conference-link",
   notes: "conference-notes",
+  recurrenceType: "conference-recurrence-type",
+  repeatUntil: "conference-repeat-until",
 };
 
 function ConferenceForm({
@@ -120,6 +132,20 @@ function ConferenceForm({
         </div>
 
         <div className="form-field">
+          <label htmlFor={fields.endDate}>Data final</label>
+          <input
+            id={fields.endDate}
+            type="date"
+            value={data.endDate}
+            onChange={(event) => updateField("endDate", event.target.value)}
+            aria-describedby={errors.endDate ? `${fields.endDate}-error` : undefined}
+          />
+          {errors.endDate && (
+            <small id={`${fields.endDate}-error`}>{errors.endDate}</small>
+          )}
+        </div>
+
+        <div className="form-field">
           <label htmlFor={fields.time}>Horário *</label>
           <input
             id={fields.time}
@@ -154,6 +180,41 @@ function ConferenceForm({
             <small id={`${fields.priority}-error`}>{errors.priority}</small>
           )}
         </div>
+
+        {!isEditing && (
+          <>
+            <div className="form-field">
+              <label htmlFor={fields.recurrenceType}>Repetir</label>
+              <select
+                id={fields.recurrenceType}
+                value={data.recurrenceType}
+                onChange={(event) => updateField("recurrenceType", event.target.value)}
+              >
+                {recurrenceOptions.map((option) => (
+                  <option value={option.value} key={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {data.recurrenceType !== "none" && (
+              <div className="form-field">
+                <label htmlFor={fields.repeatUntil}>Repetir até *</label>
+                <input
+                  id={fields.repeatUntil}
+                  type="date"
+                  value={data.repeatUntil}
+                  onChange={(event) => updateField("repeatUntil", event.target.value)}
+                  aria-describedby={errors.repeatUntil ? `${fields.repeatUntil}-error` : undefined}
+                />
+                {errors.repeatUntil && (
+                  <small id={`${fields.repeatUntil}-error`}>{errors.repeatUntil}</small>
+                )}
+              </div>
+            )}
+          </>
+        )}
 
         <div className="form-field">
           <label htmlFor={fields.responsible}>Responsável</label>

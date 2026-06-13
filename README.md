@@ -24,6 +24,8 @@ Sempre que houver push no GitHub, a Vercel dispara um novo deploy do projeto.
 - Aprovacao e rejeicao de solicitacoes.
 - Agenda de videoconferencias aprovadas.
 - Cadastro, edicao, exclusao, conclusao e reabertura de videoconferencias.
+- Videoconferencias por periodo, com data inicial e data final opcionais.
+- Recorrencia semanal, quinzenal ou mensal para criar series de videoconferencias.
 - Videoconferencias concluidas destacadas e enviadas para o fim da agenda.
 - Atualizacao automatica das telas administrativas por polling inteligente.
 - Busca, filtros, exportacao CSV, backup JSON e impressao.

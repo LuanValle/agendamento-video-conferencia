@@ -1,17 +1,104 @@
+import { randomUUID } from 'node:crypto'
 import { requireAdmin } from './_auth.js'
 import { sql } from './_db.js'
 import { readJsonBody, sendJsonParseError } from './_request.js'
+import { ensureVideoconferenciaSchema } from './_schema.js'
 import { isPastDate, isValidUrlOrEmpty, normalizeSector } from './_validators.js'
 
 const camposObrigatorios = ['nome', 'plataforma', 'data', 'horario', 'prioridade']
+const recurrenceTypes = new Set(['none', 'weekly', 'biweekly', 'monthly'])
+const MAX_OCCURRENCES = 52
 
 function temCampoObrigatorioVazio(dados) {
     return camposObrigatorios.some((campo) => !dados[campo] || !String(dados[campo]).trim())
 }
 
+function parseDate(value) {
+    if (!value) return null
+    const date = new Date(`${value}T12:00:00`)
+    return Number.isNaN(date.getTime()) ? null : date
+}
+
+function formatDate(date) {
+    return date.toISOString().slice(0, 10)
+}
+
+function addDays(date, days) {
+    const next = new Date(date)
+    next.setDate(next.getDate() + days)
+    return next
+}
+
+function addMonths(date, months) {
+    const next = new Date(date)
+    next.setMonth(next.getMonth() + months)
+    return next
+}
+
+function buildOccurrences({ data, data_fim, recurrence_type, repeat_until }) {
+    const recurrenceType = recurrence_type || 'none'
+    const startDate = parseDate(data)
+    const endDate = parseDate(data_fim) || startDate
+    const repeatUntil = parseDate(repeat_until)
+
+    if (!startDate || !endDate) {
+        return { error: 'Informe datas validas para a videoconferencia.' }
+    }
+
+    if (endDate < startDate) {
+        return { error: 'A data final nao pode ser anterior a data inicial.' }
+    }
+
+    if (!recurrenceTypes.has(recurrenceType)) {
+        return { error: 'Tipo de recorrencia invalido.' }
+    }
+
+    if (recurrenceType === 'none') {
+        return {
+            recurrenceType,
+            occurrences: [{
+                data: formatDate(startDate),
+                data_fim: data_fim ? formatDate(endDate) : null,
+            }],
+        }
+    }
+
+    if (!repeatUntil) {
+        return { error: 'Informe ate quando a recorrencia deve ser criada.' }
+    }
+
+    if (repeatUntil < startDate) {
+        return { error: 'A data limite da recorrencia nao pode ser anterior a data inicial.' }
+    }
+
+    const periodDays = Math.round((endDate.getTime() - startDate.getTime()) / 86400000)
+    const occurrences = []
+    let currentStart = startDate
+
+    while (currentStart <= repeatUntil) {
+        if (occurrences.length >= MAX_OCCURRENCES) {
+            return { error: `A recorrencia pode criar no maximo ${MAX_OCCURRENCES} ocorrencias.` }
+        }
+
+        const currentEnd = addDays(currentStart, periodDays)
+        occurrences.push({
+            data: formatDate(currentStart),
+            data_fim: data_fim ? formatDate(currentEnd) : null,
+        })
+
+        if (recurrenceType === 'weekly') currentStart = addDays(currentStart, 7)
+        if (recurrenceType === 'biweekly') currentStart = addDays(currentStart, 14)
+        if (recurrenceType === 'monthly') currentStart = addMonths(currentStart, 1)
+    }
+
+    return { recurrenceType, occurrences }
+}
+
 async function listarVideoconferencias(request, response) {
     // A agenda é administrativa, então a listagem também exige login.
     if (requireAdmin(request, response)) return
+
+    await ensureVideoconferenciaSchema()
 
     const videoconferencias = await sql`
         SELECT *
@@ -39,14 +126,24 @@ async function criarVideoconferencia(request, response) {
         nome,
         plataforma,
         data,
+        data_fim,
         horario,
         prioridade,
         responsavel,
         link,
         observacoes,
+        recurrence_type,
+        repeat_until,
     } = body
 
     const setor = normalizeSector(body.setor)
+    const recurrence = buildOccurrences({ data, data_fim, recurrence_type, repeat_until })
+
+    if (recurrence.error) {
+        return response.status(400).json({
+            error: recurrence.error,
+        })
+    }
 
     if (isPastDate(data)) {
         return response.status(400).json({
@@ -60,52 +157,74 @@ async function criarVideoconferencia(request, response) {
         })
     }
 
-    // Impede cadastro duplicado da mesma reunião no mesmo dia e horário.
-    const [duplicada] = await sql`
-        SELECT id
-        FROM videoconferencias
-        WHERE nome = ${nome.trim()}
-          AND plataforma = ${plataforma.trim()}
-          AND data = ${data.trim()}
-          AND horario = ${horario.trim()}
-        LIMIT 1
-    `
+    await ensureVideoconferenciaSchema()
 
-    if (duplicada) {
-        return response.status(409).json({
-            error: 'Já existe uma videoconferência igual neste dia e horário.',
-        })
+    for (const occurrence of recurrence.occurrences) {
+        const occurrenceEnd = occurrence.data_fim || occurrence.data
+
+        // Impede cadastro duplicado da mesma reunião no mesmo dia e horário.
+        const [duplicada] = await sql`
+            SELECT id
+            FROM videoconferencias
+            WHERE nome = ${nome.trim()}
+              AND plataforma = ${plataforma.trim()}
+              AND horario = ${horario.trim()}
+              AND data <= ${occurrenceEnd}::date
+              AND COALESCE(data_fim, data) >= ${occurrence.data}::date
+            LIMIT 1
+        `
+
+        if (duplicada) {
+            return response.status(409).json({
+                error: `Ja existe uma videoconferencia igual em ${occurrence.data} neste horario.`,
+            })
+        }
     }
 
-    const [videoconferencia] = await sql`
-        INSERT INTO videoconferencias (
+    const recurrenceGroupId = recurrence.occurrences.length > 1 ? randomUUID() : null
+    const videoconferencias = []
+
+    for (const occurrence of recurrence.occurrences) {
+        const [videoconferencia] = await sql`
+            INSERT INTO videoconferencias (
             nome,
             plataforma,
             data,
+            data_fim,
             horario,
             prioridade,
             responsavel,
             setor,
             link,
-            observacoes
+            observacoes,
+            recurrence_group_id,
+            recurrence_type
         )
         VALUES (
             ${nome.trim()},
             ${plataforma.trim()},
-            ${data.trim()},
+            ${occurrence.data},
+            ${occurrence.data_fim},
             ${horario.trim()},
             ${prioridade.trim()},
             ${responsavel?.trim() || null},
             ${setor || null},
             ${link?.trim() || null},
-            ${observacoes?.trim() || null}
+            ${observacoes?.trim() || null},
+            ${recurrenceGroupId},
+            ${recurrence.recurrenceType}
         )
         RETURNING *
-    `
+        `
+
+        videoconferencias.push(videoconferencia)
+    }
 
     return response.status(201).json({
-        message: 'Videoconferência criada com sucesso.',
-        data: videoconferencia,
+        message: videoconferencias.length > 1
+            ? `${videoconferencias.length} videoconferencias criadas com sucesso.`
+            : 'Videoconferencia criada com sucesso.',
+        data: videoconferencias.length > 1 ? videoconferencias : videoconferencias[0],
     })
 }
 

@@ -1,6 +1,7 @@
 import { requireAdmin } from '../_auth.js'
 import { sql } from '../_db.js'
 import { readJsonBody, sendJsonParseError } from '../_request.js'
+import { ensureVideoconferenciaSchema } from '../_schema.js'
 import { isPastDate, isValidUrlOrEmpty, normalizeSector } from '../_validators.js'
 
 const camposObrigatorios = ['nome', 'plataforma', 'data', 'horario', 'prioridade']
@@ -11,6 +12,8 @@ function temCampoObrigatorioVazio(dados) {
 
 async function atualizarVideoconferencia(request, response) {
     if (requireAdmin(request, response)) return
+
+    await ensureVideoconferenciaSchema()
 
     const { id } = request.query
     const body = readJsonBody(request)
@@ -25,6 +28,7 @@ async function atualizarVideoconferencia(request, response) {
         nome,
         plataforma,
         data,
+        data_fim,
         horario,
         prioridade,
         responsavel,
@@ -34,10 +38,17 @@ async function atualizarVideoconferencia(request, response) {
     } = body
 
     const setor = normalizeSector(body.setor)
+    const dataFim = data_fim?.trim() || null
 
     if (isPastDate(data)) {
         return response.status(400).json({
             error: 'A data não pode ser anterior à data atual.',
+        })
+    }
+
+    if (dataFim && dataFim < data.trim()) {
+        return response.status(400).json({
+            error: 'A data final nao pode ser anterior a data inicial.',
         })
     }
 
@@ -47,6 +58,8 @@ async function atualizarVideoconferencia(request, response) {
         })
     }
 
+    const dataFimParaConflito = dataFim || data.trim()
+
     // Evita editar uma reunião para ficar igual a outra já cadastrada.
     const [duplicada] = await sql`
         SELECT id
@@ -54,8 +67,9 @@ async function atualizarVideoconferencia(request, response) {
         WHERE id <> ${id}
           AND nome = ${nome.trim()}
           AND plataforma = ${plataforma.trim()}
-          AND data = ${data.trim()}
           AND horario = ${horario.trim()}
+          AND data <= ${dataFimParaConflito}::date
+          AND COALESCE(data_fim, data) >= ${data.trim()}::date
         LIMIT 1
     `
 
@@ -70,6 +84,7 @@ async function atualizarVideoconferencia(request, response) {
         SET nome = ${nome.trim()},
             plataforma = ${plataforma.trim()},
             data = ${data.trim()},
+            data_fim = ${dataFim},
             horario = ${horario.trim()},
             prioridade = ${prioridade.trim()},
             responsavel = ${responsavel?.trim() || null},
@@ -96,6 +111,8 @@ async function atualizarVideoconferencia(request, response) {
 
 async function excluirVideoconferencia(request, response) {
     if (requireAdmin(request, response)) return
+
+    await ensureVideoconferenciaSchema()
 
     const { id } = request.query
 

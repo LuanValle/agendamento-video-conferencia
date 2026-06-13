@@ -8,6 +8,7 @@ const requiredFields = [
 
 const validPriorities = ['Baixa', 'Média', 'Alta', 'Crítica']
 const validPlatforms = ['Google Meet', 'Microsoft Teams', 'Zoom', 'Webex', 'UNA', 'Presencial', 'Outro']
+const validRecurrenceTypes = ['none', 'weekly', 'biweekly', 'monthly']
 
 const isPastDate = (value) => {
   if (!value) return false
@@ -42,6 +43,22 @@ export const validateConference = (conference) => {
     errors.date = 'A data não pode ser anterior à data atual.'
   }
 
+  if (conference.endDate && conference.date && conference.endDate < conference.date) {
+    errors.endDate = 'A data final não pode ser anterior à data inicial.'
+  }
+
+  if (conference.recurrenceType && !validRecurrenceTypes.includes(conference.recurrenceType)) {
+    errors.recurrenceType = 'Tipo de recorrência inválido.'
+  }
+
+  if (conference.recurrenceType && conference.recurrenceType !== 'none') {
+    if (!conference.repeatUntil?.trim()) {
+      errors.repeatUntil = 'Informe até quando a recorrência deve ser criada.'
+    } else if (conference.date && conference.repeatUntil < conference.date) {
+      errors.repeatUntil = 'A data limite da recorrência não pode ser anterior à data inicial.'
+    }
+  }
+
   if (conference.link?.trim() && !isValidUrl(conference.link.trim())) {
     errors.link = 'Informe uma URL válida começando com http:// ou https://.'
   }
@@ -67,11 +84,13 @@ const isValidConferenceShape = (item) => {
   if (!validPlatforms.includes(item.platform)) return false
   if (!validPriorities.includes(item.priority)) return false
   if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) return false
+  if (item.endDate && !/^\d{4}-\d{2}-\d{2}$/.test(item.endDate)) return false
   if (!/^\d{2}:\d{2}$/.test(item.time)) return false
   if (item.link && !isValidUrl(item.link)) return false
 
   return (
     isStringOrMissing(item.id) &&
+    isStringOrMissing(item.endDate) &&
     isStringOrMissing(item.responsible) &&
     isStringOrMissing(item.department) &&
     isStringOrMissing(item.link) &&

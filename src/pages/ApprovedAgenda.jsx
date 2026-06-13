@@ -35,10 +35,10 @@ function filterConferences(conferences, activeFilter) {
     completed: (conference) => conference.completed,
     expired: (conference) => getSituation(conference) === 'vencida',
     'high-critical': (conference) => isHighPriority(conference.priority),
-    today: (conference) => isToday(conference.date),
-    week: (conference) => isWithinCurrentWeek(conference.date),
-    month: (conference) => isWithinCurrentMonth(conference.date),
-    'next-30': (conference) => isWithinNext30Days(conference.date),
+    today: (conference) => isToday(conference.date, conference.endDate),
+    week: (conference) => isWithinCurrentWeek(conference.date, conference.endDate),
+    month: (conference) => isWithinCurrentMonth(conference.date, conference.endDate),
+    'next-30': (conference) => isWithinNext30Days(conference.date, conference.endDate),
   }
 
   return conferences.filter(predicates[activeFilter] || predicates.all)
@@ -136,7 +136,7 @@ function ApprovedAgenda() {
       pending: conferences.filter((conference) => getSituation(conference) === 'pendente').length,
       completed: conferences.filter((conference) => conference.completed).length,
       expired: conferences.filter((conference) => getSituation(conference) === 'vencida').length,
-      today: conferences.filter((conference) => isToday(conference.date)).length,
+      today: conferences.filter((conference) => isToday(conference.date, conference.endDate)).length,
       highPriority: conferences.filter((conference) => isHighPriority(conference.priority)).length,
     }),
     [conferences],
@@ -307,12 +307,15 @@ function ApprovedAgenda() {
       name: conference.name,
       platform: conference.platform,
       date: conference.date,
+      endDate: conference.endDate || '',
       time: conference.time,
       priority: conference.priority,
       responsible: conference.responsible || '',
       department: conference.department || '',
       link: conference.link || '',
       notes: conference.notes || '',
+      recurrenceType: 'none',
+      repeatUntil: '',
     })
     setErrors({})
     setMessage('Modo de edicao ativado.')

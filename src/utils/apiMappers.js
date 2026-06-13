@@ -25,6 +25,7 @@ export const apiToConference = (item) => ({
   name: item.nome,
   platform: item.plataforma,
   date: item.data?.slice(0, 10) || '',
+  endDate: item.data_fim?.slice(0, 10) || '',
   time: item.horario?.slice(0, 5) || '',
   priority: item.prioridade,
   responsible: item.responsavel || '',
@@ -32,6 +33,8 @@ export const apiToConference = (item) => ({
   link: item.link || '',
   notes: item.observacoes || '',
   completed: Boolean(item.concluida),
+  recurrenceGroupId: item.recurrence_group_id || '',
+  recurrenceType: item.recurrence_type || 'none',
   createdAt: item.criado_em,
   updatedAt: item.atualizado_em,
 })
@@ -41,6 +44,7 @@ export const conferenceToApi = (conference) => ({
   nome: conference.name,
   plataforma: conference.platform,
   data: conference.date,
+  data_fim: conference.endDate || null,
   horario: conference.time,
   prioridade: conference.priority,
   responsavel: conference.responsible,
@@ -48,4 +52,6 @@ export const conferenceToApi = (conference) => ({
   link: conference.link,
   observacoes: conference.notes,
   concluida: Boolean(conference.completed),
+  recurrence_type: conference.recurrenceType || 'none',
+  repeat_until: conference.repeatUntil || null,
 })

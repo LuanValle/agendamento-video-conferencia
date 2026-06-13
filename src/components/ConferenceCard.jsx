@@ -1,6 +1,6 @@
 import { CalendarDays, CheckCircle2, Clock, ExternalLink, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import {
-  formatDatePtBr,
+  formatDateRangePtBr,
   getDateStatusText,
   getSituation,
   getVisualClassByProximity,
@@ -29,9 +29,9 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
         <div>
           <dt>
             <CalendarDays size={15} />
-            Data
+            {conference.endDate ? 'Período' : 'Data'}
           </dt>
-          <dd>{formatDatePtBr(conference.date)}</dd>
+          <dd>{formatDateRangePtBr(conference.date, conference.endDate)}</dd>
         </div>
         <div>
           <dt>

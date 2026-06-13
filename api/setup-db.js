@@ -28,6 +28,7 @@ export default async function handler(request, response) {
             plataforma TEXT NOT NULL,
             data DATE NOT NULL,
             horario TIME NOT NULL,
+            data_fim DATE,
             prioridade TEXT NOT NULL,
             responsavel TEXT,
             setor TEXT,
@@ -35,9 +36,23 @@ export default async function handler(request, response) {
             observacoes TEXT,
             concluida BOOLEAN NOT NULL DEFAULT false,
             solicitacao_id INTEGER REFERENCES solicitacoes(id),
+            recurrence_group_id TEXT,
+            recurrence_type TEXT,
             criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             atualizado_em TIMESTAMP
         )`
+        await sql`
+            ALTER TABLE videoconferencias
+            ADD COLUMN IF NOT EXISTS data_fim DATE
+        `
+        await sql`
+            ALTER TABLE videoconferencias
+            ADD COLUMN IF NOT EXISTS recurrence_group_id TEXT
+        `
+        await sql`
+            ALTER TABLE videoconferencias
+            ADD COLUMN IF NOT EXISTS recurrence_type TEXT
+        `
         await sql`
             CREATE INDEX IF NOT EXISTS idx_solicitacoes_status_criado
             ON solicitacoes (status, criado_em DESC)
@@ -50,6 +65,10 @@ export default async function handler(request, response) {
         await sql`
             CREATE INDEX IF NOT EXISTS idx_videoconferencias_agenda
             ON videoconferencias (concluida, data, horario)
+        `
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_videoconferencias_periodo
+            ON videoconferencias (concluida, data, data_fim, horario)
         `
         await sql`
             CREATE INDEX IF NOT EXISTS idx_videoconferencias_duplicidade

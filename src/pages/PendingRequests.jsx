@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import RejectModal from '../components/RejectModal'
 import RequestCard from '../components/RequestCard'
 import { apiToRequest } from '../utils/apiMappers'
+import { notifyAgendaChanged, notifyRequestsChanged, REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
+import { useSmartPolling } from '../utils/useSmartPolling'
 
 function PendingRequests() {
   const [requests, setRequests] = useState([])
@@ -12,9 +14,9 @@ function PendingRequests() {
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [isRejecting, setIsRejecting] = useState(false)
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async ({ showLoading = false } = {}) => {
     try {
-      setLoading(true)
+      if (showLoading) setLoading(true)
       setError('')
 
       // Carrega as solicitações reais do banco por meio da API.
@@ -31,11 +33,18 @@ function PendingRequests() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchRequests()
-  }, [])
+    fetchRequests({ showLoading: true })
+  }, [fetchRequests])
+
+  useSmartPolling(fetchRequests, 5000)
+
+  useEffect(() => {
+    const refreshRequests = () => fetchRequests()
+    return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshRequests)
+  }, [fetchRequests])
 
   const pendingRequests = requests.filter((request) => request.status === 'pendente')
 
@@ -57,6 +66,8 @@ function PendingRequests() {
       }
 
       await fetchRequests()
+      notifyRequestsChanged()
+      notifyAgendaChanged()
     } catch (error) {
       setError(error.message)
     } finally {
@@ -89,6 +100,7 @@ function PendingRequests() {
 
       setRejecting(null)
       await fetchRequests()
+      notifyRequestsChanged()
     } catch (error) {
       setError(error.message)
     } finally {

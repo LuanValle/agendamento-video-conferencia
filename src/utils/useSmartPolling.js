@@ -4,9 +4,17 @@ export function useSmartPolling(callback, intervalMs = 5000) {
   useEffect(() => {
     let intervalId
     let isStopped = false
+    let isRunning = false
 
-    const run = () => {
-      if (!document.hidden) callback()
+    const run = async () => {
+      if (document.hidden || isRunning || isStopped) return
+
+      try {
+        isRunning = true
+        await callback()
+      } finally {
+        isRunning = false
+      }
     }
 
     // Executa ao entrar na tela e depois respeita se a aba estiver ativa.
@@ -14,7 +22,7 @@ export function useSmartPolling(callback, intervalMs = 5000) {
     intervalId = setInterval(run, intervalMs)
 
     const handleVisibilityChange = () => {
-      if (!document.hidden && !isStopped) callback()
+      run()
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)

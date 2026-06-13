@@ -17,6 +17,7 @@ import {
   sortByDateAndTime,
 } from '../utils/dateUtils'
 import { exportCsv, exportJsonBackup, importJsonBackup } from '../utils/exportUtils'
+import { AGENDA_CHANGED_EVENT, notifyAgendaChanged, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
 import { validateConference } from '../utils/validationUtils'
 
@@ -95,7 +96,12 @@ function ApprovedAgenda() {
   }, [])
 
   // Atualiza enquanto a aba esta ativa e força uma busca ao voltar para a aba.
-  useSmartPolling(fetchConferences, 30000)
+  useSmartPolling(fetchConferences, 5000)
+
+  useEffect(() => {
+    const refreshConferences = () => fetchConferences()
+    return subscribeRealtimeEvent(AGENDA_CHANGED_EVENT, refreshConferences)
+  }, [fetchConferences])
 
   useEffect(() => {
     // O modo telao troca classes globais para esconder controles e focar na agenda.
@@ -161,6 +167,7 @@ function ApprovedAgenda() {
 
       // Recarrega a lista para mostrar exatamente o que ficou salvo no Neon.
       await fetchConferences()
+      notifyAgendaChanged()
       setMessage('Videoconferencia excluida com sucesso.')
       setConfirmingDeleteId(null)
     } catch (error) {
@@ -204,6 +211,7 @@ function ApprovedAgenda() {
       }
 
       await fetchConferences()
+      notifyAgendaChanged()
       setMessage(completed ? 'Videoconferencia marcada como concluida.' : 'Videoconferencia reaberta.')
     } catch (error) {
       setMessage(error.message || 'Erro ao atualizar videoconferencia.')
@@ -260,6 +268,7 @@ function ApprovedAgenda() {
         }
 
         await fetchConferences()
+        notifyAgendaChanged()
         setMessage('Videoconferencia atualizada com sucesso.')
       } else {
         // POST cria uma videoconferencia nova diretamente como aprovada.
@@ -279,6 +288,7 @@ function ApprovedAgenda() {
         }
 
         await fetchConferences()
+        notifyAgendaChanged()
         setMessage('Videoconferencia adicionada com sucesso.')
       }
 

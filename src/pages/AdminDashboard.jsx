@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Dashboard from '../components/Dashboard'
 import { apiToRequest } from '../utils/apiMappers'
 import { getRequestSummary } from '../utils/requestUtils'
+import { REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
 
 function AdminDashboard() {
@@ -53,7 +54,12 @@ function AdminDashboard() {
     }
   }, [])
 
-  useSmartPolling(fetchSummary, 30000)
+  useSmartPolling(fetchSummary, 5000)
+
+  useEffect(() => {
+    const refreshSummary = () => fetchSummary()
+    return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshSummary)
+  }, [fetchSummary])
 
   return (
     <section>

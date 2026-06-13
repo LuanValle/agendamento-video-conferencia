@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import ErrorMessage from '../components/ErrorMessage'
 import { formatContact, formatNip, normalizeSector, onlyDigits } from '../utils/formatters'
+import { notifyRequestsChanged } from '../utils/realtimeEvents'
 import { isValidUrl } from '../utils/validationUtils'
 
 const initialForm = {
@@ -126,6 +127,7 @@ function SolicitationPage() {
 
       setForm(initialForm)
       setError('')
+      notifyRequestsChanged()
       setSuccess('Solicitação enviada com sucesso. Ela ficará pendente para análise administrativa.')
     } catch {
       setSuccess('')

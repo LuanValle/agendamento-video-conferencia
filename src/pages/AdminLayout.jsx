@@ -1,10 +1,11 @@
 import { CalendarDays, Home, Inbox, LayoutDashboard, List, LogOut, XCircle } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import ConfirmModal from '../components/ConfirmModal'
 import RejectModal from '../components/RejectModal'
 import { apiToRequest } from '../utils/apiMappers'
 import { formatDatePtBr } from '../utils/dateUtils'
+import { notifyAgendaChanged, notifyRequestsChanged, REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
 
 const priorityClassByName = {
@@ -41,7 +42,12 @@ function AdminLayout() {
     }
   }, [])
 
-  useSmartPolling(fetchPendingRequests, 30000)
+  useSmartPolling(fetchPendingRequests, 5000)
+
+  useEffect(() => {
+    const refreshPendingRequests = () => fetchPendingRequests()
+    return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshPendingRequests)
+  }, [fetchPendingRequests])
 
   const handleLogout = async () => {
     // Limpa a sessão visual e também pede para a API remover o cookie administrativo.
@@ -62,6 +68,8 @@ function AdminLayout() {
 
       setConfirmingRequest(null)
       await fetchPendingRequests()
+      notifyRequestsChanged()
+      notifyAgendaChanged()
     } finally {
       setActionLoadingId(null)
     }
@@ -85,6 +93,7 @@ function AdminLayout() {
 
       setRejectingRequest(null)
       await fetchPendingRequests()
+      notifyRequestsChanged()
     } finally {
       setActionLoadingId(null)
     }

@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import RequestCard from '../components/RequestCard'
 import { apiToRequest } from '../utils/apiMappers'
+import { REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
+import { useSmartPolling } from '../utils/useSmartPolling'
 
 function RejectedRequests() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async ({ showLoading = false } = {}) => {
     try {
-      setLoading(true)
+      if (showLoading) setLoading(true)
       setError('')
 
       // Carrega todas as solicitacoes do banco e filtra as rejeitadas na tela.
@@ -28,11 +30,18 @@ function RejectedRequests() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchRequests()
-  }, [])
+    fetchRequests({ showLoading: true })
+  }, [fetchRequests])
+
+  useSmartPolling(fetchRequests, 10000)
+
+  useEffect(() => {
+    const refreshRequests = () => fetchRequests()
+    return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshRequests)
+  }, [fetchRequests])
 
   const rejected = requests.filter((request) => request.status === 'rejeitada')
 

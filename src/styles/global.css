@@ -622,6 +622,8 @@ small {
   border-radius: 8px;
   padding: 18px;
   background: #ffffff;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .status-warning {
@@ -662,16 +664,24 @@ small {
   justify-content: space-between;
 }
 
+.card-topline > div {
+  min-width: 0;
+}
+
 .card-topline h3 {
   margin: 0;
   color: #172033;
   font-size: 1.18rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .card-topline p {
   margin: 6px 0 0;
   color: var(--text-muted);
   font-weight: 700;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .badge-group {
@@ -680,6 +690,9 @@ small {
   gap: 8px;
   align-items: flex-start;
   justify-content: flex-end;
+  flex: 0 1 auto;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .priority-badge,
@@ -691,6 +704,9 @@ small {
   padding: 5px 10px;
   font-size: 0.78rem;
   font-weight: 900;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .priority-baixa {
@@ -731,9 +747,10 @@ small {
 
 .conference-details {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 12px;
   margin: 18px 0;
+  min-width: 0;
 }
 
 .conference-details div {
@@ -765,9 +782,16 @@ dd {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  max-width: 100%;
   color: var(--primary-dark);
   font-weight: 800;
   text-decoration: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.meeting-link svg {
+  flex: 0 0 auto;
 }
 
 .meeting-link:hover {
@@ -778,6 +802,8 @@ dd {
   margin: 14px 0 0;
   color: #475467;
   line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .card-actions {

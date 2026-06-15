@@ -236,7 +236,12 @@ function SolicitationPage() {
             </label>
             <label className="form-field full-width">
               Observações
-              <textarea value={form.notes} onChange={(event) => updateField('notes', event.target.value)} rows="4" />
+              <textarea
+                value={form.notes}
+                onChange={(event) => updateField('notes', event.target.value)}
+                rows="4"
+                placeholder="Informe detalhes importantes: se ainda precisa que o link da videoconferência seja criado, materiais necessários, pauta, participantes, período de duração ou qualquer orientação para o administrador."
+              />
             </label>
             <div className="form-actions full-width">
               <button className="button primary" type="submit" disabled={isSending}>

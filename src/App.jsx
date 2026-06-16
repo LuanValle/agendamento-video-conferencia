@@ -4,6 +4,7 @@ import SiteFooter from './components/SiteFooter'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminLayout from './pages/AdminLayout'
 import AdminLogin from './pages/AdminLogin'
+import AuditPage from './pages/AuditPage'
 import AllRequests from './pages/AllRequests'
 import ApprovedAgenda from './pages/ApprovedAgenda'
 import HomePage from './pages/HomePage'
@@ -39,6 +40,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="solicitacoes" element={<PendingRequests />} />
           <Route path="agenda" element={<ApprovedAgenda />} />
+          <Route path="auditoria" element={<AuditPage />} />
           <Route path="rejeitadas" element={<RejectedRequests />} />
           <Route path="todas" element={<AllRequests />} />
         </Route>

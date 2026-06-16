@@ -104,6 +104,10 @@ function AdminDashboard() {
           <strong>Agenda aprovada</strong>
           <span>Ver videoconferências aprovadas e cadastradas.</span>
         </Link>
+        <Link className="entry-card" to="/admin/auditoria">
+          <strong>Auditoria</strong>
+          <span>Gerar relatorios e consultar acoes administrativas.</span>
+        </Link>
         <Link className="entry-card" to="/admin/todas">
           <strong>Todas as solicitações</strong>
           <span>Consultar o histórico completo.</span>

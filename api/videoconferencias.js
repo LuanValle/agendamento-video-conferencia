@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { safeLogAuditAction } from './_audit.js'
 import { requireAdmin } from './_auth.js'
 import { sql } from './_db.js'
 import { readJsonBody, sendJsonParseError } from './_request.js'
@@ -219,6 +220,25 @@ async function criarVideoconferencia(request, response) {
 
         videoconferencias.push(videoconferencia)
     }
+
+    await safeLogAuditAction({
+        acao: 'criar_videoconferencia',
+        entidade: 'videoconferencia',
+        entidadeId: recurrenceGroupId || videoconferencias[0]?.id,
+        detalhes: {
+            origem: 'cadastro_manual',
+            quantidade: videoconferencias.length,
+            ids: videoconferencias.map((item) => item.id),
+            nome: nome.trim(),
+            plataforma: plataforma.trim(),
+            data,
+            data_fim: data_fim || null,
+            horario: horario.trim(),
+            prioridade: prioridade.trim(),
+            setor: setor || null,
+            recurrence_type: recurrence.recurrenceType,
+        },
+    })
 
     return response.status(201).json({
         message: videoconferencias.length > 1

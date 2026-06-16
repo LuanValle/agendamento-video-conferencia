@@ -1,4 +1,5 @@
 import { requireAdmin } from '../_auth.js'
+import { safeLogAuditAction } from '../_audit.js'
 import { sql } from '../_db.js'
 import { readJsonBody, sendJsonParseError } from '../_request.js'
 import { ensureVideoconferenciaSchema } from '../_schema.js'
@@ -10,6 +11,18 @@ function temCampoObrigatorioVazio(dados) {
     return camposObrigatorios.some((campo) => !dados[campo] || !String(dados[campo]).trim())
 }
 
+const pickAuditFields = (videoconferencia) => ({
+    nome: videoconferencia.nome,
+    plataforma: videoconferencia.plataforma,
+    data: videoconferencia.data,
+    data_fim: videoconferencia.data_fim,
+    horario: videoconferencia.horario,
+    prioridade: videoconferencia.prioridade,
+    responsavel: videoconferencia.responsavel,
+    setor: videoconferencia.setor,
+    concluida: videoconferencia.concluida,
+})
+
 async function atualizarVideoconferencia(request, response) {
     if (requireAdmin(request, response)) return
 
@@ -20,7 +33,7 @@ async function atualizarVideoconferencia(request, response) {
 
     if (temCampoObrigatorioVazio(body)) {
         return response.status(400).json({
-            error: 'Preencha todos os campos obrigatórios.',
+            error: 'Preencha todos os campos obrigatorios.',
         })
     }
 
@@ -39,10 +52,11 @@ async function atualizarVideoconferencia(request, response) {
 
     const setor = normalizeSector(body.setor)
     const dataFim = data_fim?.trim() || null
+    const completedValue = Boolean(concluida)
 
     if (isPastDate(data)) {
         return response.status(400).json({
-            error: 'A data não pode ser anterior à data atual.',
+            error: 'A data nao pode ser anterior a data atual.',
         })
     }
 
@@ -54,13 +68,25 @@ async function atualizarVideoconferencia(request, response) {
 
     if (!isValidUrlOrEmpty(link?.trim())) {
         return response.status(400).json({
-            error: 'Informe uma URL válida começando com http:// ou https://.',
+            error: 'Informe uma URL valida comecando com http:// ou https://.',
+        })
+    }
+
+    const [videoconferenciaAnterior] = await sql`
+        SELECT *
+        FROM videoconferencias
+        WHERE id = ${id}
+        LIMIT 1
+    `
+
+    if (!videoconferenciaAnterior) {
+        return response.status(404).json({
+            error: 'Videoconferencia nao encontrada.',
         })
     }
 
     const dataFimParaConflito = dataFim || data.trim()
 
-    // Evita editar uma reunião para ficar igual a outra já cadastrada.
     const [duplicada] = await sql`
         SELECT id
         FROM videoconferencias
@@ -75,7 +101,7 @@ async function atualizarVideoconferencia(request, response) {
 
     if (duplicada) {
         return response.status(409).json({
-            error: 'Já existe uma videoconferência igual neste dia e horário.',
+            error: 'Ja existe uma videoconferencia igual neste dia e horario.',
         })
     }
 
@@ -91,20 +117,30 @@ async function atualizarVideoconferencia(request, response) {
             setor = ${setor || null},
             link = ${link?.trim() || null},
             observacoes = ${observacoes?.trim() || null},
-            concluida = ${Boolean(concluida)},
+            concluida = ${completedValue},
             atualizado_em = CURRENT_TIMESTAMP
         WHERE id = ${id}
         RETURNING *
     `
 
-    if (!videoconferencia) {
-        return response.status(404).json({
-            error: 'Videoconferência não encontrada.',
-        })
-    }
+    const acao = !videoconferenciaAnterior.concluida && completedValue
+        ? 'concluir_videoconferencia'
+        : videoconferenciaAnterior.concluida && !completedValue
+            ? 'reabrir_videoconferencia'
+            : 'editar_videoconferencia'
+
+    await safeLogAuditAction({
+        acao,
+        entidade: 'videoconferencia',
+        entidadeId: videoconferencia.id,
+        detalhes: {
+            antes: pickAuditFields(videoconferenciaAnterior),
+            depois: pickAuditFields(videoconferencia),
+        },
+    })
 
     return response.status(200).json({
-        message: 'Videoconferência atualizada com sucesso.',
+        message: 'Videoconferencia atualizada com sucesso.',
         data: videoconferencia,
     })
 }
@@ -124,12 +160,19 @@ async function excluirVideoconferencia(request, response) {
 
     if (!videoconferencia) {
         return response.status(404).json({
-            error: 'Videoconferência não encontrada.',
+            error: 'Videoconferencia nao encontrada.',
         })
     }
 
+    await safeLogAuditAction({
+        acao: 'excluir_videoconferencia',
+        entidade: 'videoconferencia',
+        entidadeId: videoconferencia.id,
+        detalhes: pickAuditFields(videoconferencia),
+    })
+
     return response.status(200).json({
-        message: 'Videoconferência excluída com sucesso.',
+        message: 'Videoconferencia excluida com sucesso.',
         data: videoconferencia,
     })
 }
@@ -140,7 +183,7 @@ export default async function handler(request, response) {
         if (request.method === 'DELETE') return excluirVideoconferencia(request, response)
 
         return response.status(405).json({
-            error: 'Método não permitido.',
+            error: 'Metodo nao permitido.',
         })
     } catch (error) {
         if (error instanceof SyntaxError) return sendJsonParseError(response)

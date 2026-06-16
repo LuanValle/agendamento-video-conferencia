@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../_auth.js'
+import { safeLogAuditAction } from '../../_audit.js'
 import { sql } from '../../_db.js'
 
 export default async function handler(request, response) {
@@ -102,6 +103,21 @@ export default async function handler(request, response) {
             WHERE id = ${id}
             RETURNING *
         `
+
+        await safeLogAuditAction({
+            acao: 'aprovar_solicitacao',
+            entidade: 'solicitacao',
+            entidadeId: solicitacao.id,
+            detalhes: {
+                solicitacao_id: solicitacao.id,
+                videoconferencia_id: videoconferencia.id,
+                nome_videoconferencia: solicitacao.nome_videoconferencia,
+                solicitante: solicitacao.nome,
+                setor: solicitacao.setor,
+                data: solicitacao.data,
+                horario: solicitacao.horario,
+            },
+        })
 
         return response.status(200).json({
             message: 'Solicitação aprovada com sucesso.',

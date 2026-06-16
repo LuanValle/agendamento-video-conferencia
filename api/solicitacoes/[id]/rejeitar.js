@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../_auth.js'
+import { safeLogAuditAction } from '../../_audit.js'
 import { sql } from '../../_db.js'
 import { readJsonBody, sendJsonParseError } from '../../_request.js'
 
@@ -56,6 +57,19 @@ export default async function handler(request, response) {
             WHERE id = ${id}
             RETURNING *
         `
+
+        await safeLogAuditAction({
+            acao: 'rejeitar_solicitacao',
+            entidade: 'solicitacao',
+            entidadeId: solicitacao.id,
+            detalhes: {
+                solicitacao_id: solicitacao.id,
+                nome_videoconferencia: solicitacao.nome_videoconferencia,
+                solicitante: solicitacao.nome,
+                setor: solicitacao.setor,
+                motivo_rejeicao: motivo,
+            },
+        })
 
         return response.status(200).json({
             message: 'Solicitação rejeitada com sucesso.',

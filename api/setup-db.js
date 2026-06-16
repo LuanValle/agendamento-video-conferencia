@@ -52,6 +52,16 @@ export default async function handler(request, response) {
             atualizado_em TIMESTAMP
         )`
         await sql`
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id SERIAL PRIMARY KEY,
+            acao TEXT NOT NULL,
+            entidade TEXT NOT NULL,
+            entidade_id TEXT,
+            usuario TEXT,
+            detalhes JSONB,
+            criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )`
+        await sql`
             ALTER TABLE videoconferencias
             ADD COLUMN IF NOT EXISTS data_fim DATE
         `
@@ -83,6 +93,14 @@ export default async function handler(request, response) {
         await sql`
             CREATE INDEX IF NOT EXISTS idx_videoconferencias_duplicidade
             ON videoconferencias (nome, plataforma, data, horario)
+        `
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_audit_logs_criado
+            ON audit_logs (criado_em DESC)
+        `
+        await sql`
+            CREATE INDEX IF NOT EXISTS idx_audit_logs_entidade
+            ON audit_logs (entidade, entidade_id)
         `
 
         return response.status(200).json({

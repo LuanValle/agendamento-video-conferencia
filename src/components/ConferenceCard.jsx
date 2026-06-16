@@ -8,7 +8,7 @@ import {
 } from '../utils/dateUtils'
 import { buildCallTicketText } from '../utils/callTicketTemplate'
 
-const SISRECIM_TICKET_URL = 'https://sisrecim.ctim.mb/front/ticket.form.php'
+const SISRECIM_TICKET_URL = 'https://siscsrecim.ctim.mb/front/ticket.form.php'
 
 const copyToClipboard = async (text) => {
   if (navigator.clipboard?.writeText) {

@@ -1,14 +1,45 @@
-import { CalendarDays, CheckCircle2, Clock, ExternalLink, Pencil, RotateCcw, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { CalendarDays, CheckCircle2, Clock, Copy, ExternalLink, Pencil, RotateCcw, Trash2 } from 'lucide-react'
 import {
   formatDateRangePtBr,
   getDateStatusText,
   getSituation,
   getVisualClassByProximity,
 } from '../utils/dateUtils'
+import { buildCallTicketText } from '../utils/callTicketTemplate'
+
+const copyToClipboard = async (text) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return
+  }
+
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.setAttribute('readonly', '')
+  textArea.style.position = 'fixed'
+  textArea.style.opacity = '0'
+  document.body.appendChild(textArea)
+  textArea.select()
+  document.execCommand('copy')
+  document.body.removeChild(textArea)
+}
 
 function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) {
   const statusClass = getVisualClassByProximity(conference)
   const situation = getSituation(conference)
+  const [copyStatus, setCopyStatus] = useState('')
+
+  const handleCopyTicket = async () => {
+    try {
+      await copyToClipboard(buildCallTicketText(conference))
+      setCopyStatus('copied')
+      window.setTimeout(() => setCopyStatus(''), 1800)
+    } catch {
+      setCopyStatus('error')
+      window.setTimeout(() => setCopyStatus(''), 2200)
+    }
+  }
 
   return (
     <article className={`conference-card ${statusClass}`}>
@@ -72,6 +103,15 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
           <button className="icon-button" type="button" onClick={() => onEdit(conference)} title="Editar">
             <Pencil size={17} />
             <span>Editar</span>
+          </button>
+          <button
+            className={copyStatus === 'copied' ? 'icon-button copied' : 'icon-button'}
+            type="button"
+            onClick={handleCopyTicket}
+            title="Copiar modelo de chamado"
+          >
+            <Copy size={17} />
+            <span>{copyStatus === 'copied' ? 'Copiado' : copyStatus === 'error' ? 'Erro ao copiar' : 'Copiar chamado'}</span>
           </button>
           {conference.completed ? (
             <button className="icon-button" type="button" onClick={() => onReopen(conference.id)} title="Reabrir">

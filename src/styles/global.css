@@ -905,6 +905,12 @@ dd {
   color: var(--success);
 }
 
+.icon-button.copied {
+  background: #dcfae6;
+  color: #087443;
+  border-color: #abefc6;
+}
+
 .icon-button.danger {
   color: var(--danger);
 }

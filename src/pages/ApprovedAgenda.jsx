@@ -52,6 +52,7 @@ function searchConferences(conferences, searchTerm) {
     [
       conference.name,
       conference.platform,
+      conference.physicalLocation,
       conference.responsible,
       conference.department,
       conference.notes,

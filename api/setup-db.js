@@ -41,6 +41,7 @@ export default async function handler(request, response) {
             id SERIAL PRIMARY KEY,
             nome TEXT NOT NULL,
             plataforma TEXT NOT NULL,
+            local_fisico TEXT,
             data DATE NOT NULL,
             horario TIME NOT NULL,
             data_fim DATE,
@@ -66,6 +67,10 @@ export default async function handler(request, response) {
             detalhes JSONB,
             criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )`
+        await sql`
+            ALTER TABLE videoconferencias
+            ADD COLUMN IF NOT EXISTS local_fisico TEXT
+        `
         await sql`
             ALTER TABLE videoconferencias
             ADD COLUMN IF NOT EXISTS data_fim DATE

@@ -87,6 +87,7 @@ const buildChangeList = (log) => {
   const fields = [
     ['nome', 'Nome'],
     ['plataforma', 'Plataforma'],
+    ['local_fisico', 'Local'],
     ['data', 'Data'],
     ['data_fim', 'Data final'],
     ['horario', 'Horario'],
@@ -317,6 +318,7 @@ function AuditPage() {
                 </div>
                 <p>
                   {item.plataforma}
+                  {item.local_fisico ? ` - ${item.local_fisico}` : ''}
                   {item.responsavel ? ` - ${item.responsavel}` : ''}
                   {item.setor ? ` - ${item.setor}` : ''}
                 </p>

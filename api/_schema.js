@@ -58,6 +58,11 @@ export async function ensureVideoconferenciaSchema() {
 
     await sql`
         ALTER TABLE videoconferencias
+        ADD COLUMN IF NOT EXISTS local_fisico TEXT
+    `
+
+    await sql`
+        ALTER TABLE videoconferencias
         ADD COLUMN IF NOT EXISTS data_fim DATE
     `
 

@@ -27,6 +27,7 @@ export const apiToConference = (item) => ({
   id: item.id,
   name: item.nome,
   platform: item.plataforma,
+  physicalLocation: item.local_fisico || '',
   date: item.data?.slice(0, 10) || '',
   endDate: item.data_fim?.slice(0, 10) || '',
   time: item.horario?.slice(0, 5) || '',
@@ -46,6 +47,7 @@ export const apiToConference = (item) => ({
 export const conferenceToApi = (conference) => ({
   nome: conference.name,
   plataforma: conference.platform,
+  local_fisico: conference.physicalLocation,
   data: conference.date,
   data_fim: conference.endDate || null,
   horario: conference.time,

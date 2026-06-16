@@ -101,6 +101,12 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
             <dd>{conference.department}</dd>
           </div>
         )}
+        {conference.physicalLocation && (
+          <div>
+            <dt>Local</dt>
+            <dd>{conference.physicalLocation}</dd>
+          </div>
+        )}
         <div>
           <dt>Situação</dt>
           <dd className="capitalize">{situation}</dd>

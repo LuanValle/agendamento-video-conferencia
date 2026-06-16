@@ -46,6 +46,7 @@ export const importJsonBackup = (file) =>
             id: item.id || crypto.randomUUID(),
             name: item.name || '',
             platform: item.platform || '',
+            physicalLocation: item.physicalLocation || '',
             date: item.date || '',
             endDate: item.endDate || '',
             time: item.time || '',
@@ -75,7 +76,8 @@ const escapeCsv = (value) => {
 export const buildCsvContent = (conferences) => {
   const headers = [
     'Nome',
-    'Local/Plataforma',
+    'Plataforma',
+    'Local',
     'Data inicial',
     'Data final',
     'Horário',
@@ -91,6 +93,7 @@ export const buildCsvContent = (conferences) => {
   const rows = conferences.map((conference) => [
     conference.name,
     conference.platform,
+    conference.physicalLocation,
     conference.date,
     conference.endDate || '',
     conference.time,

@@ -10,6 +10,7 @@ function conferenceToForm(conference) {
   return {
     name: conference.name,
     platform: conference.platform,
+    physicalLocation: conference.physicalLocation || '',
     date: conference.date,
     endDate: conference.endDate || '',
     time: conference.time,

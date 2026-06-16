@@ -1,6 +1,6 @@
 const requiredFields = [
   ['name', 'Nome da videoconferência é obrigatório.'],
-  ['platform', 'Local ou plataforma é obrigatório.'],
+  ['platform', 'Plataforma e obrigatoria.'],
   ['date', 'Data é obrigatória.'],
   ['time', 'Horário é obrigatório.'],
   ['priority', 'Prioridade é obrigatória.'],
@@ -91,6 +91,7 @@ const isValidConferenceShape = (item) => {
   return (
     isStringOrMissing(item.id) &&
     isStringOrMissing(item.endDate) &&
+    isStringOrMissing(item.physicalLocation) &&
     isStringOrMissing(item.responsible) &&
     isStringOrMissing(item.department) &&
     isStringOrMissing(item.link) &&

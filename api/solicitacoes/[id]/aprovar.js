@@ -1,6 +1,7 @@
 import { requireAdmin } from '../../_auth.js'
 import { safeLogAuditAction } from '../../_audit.js'
 import { sql } from '../../_db.js'
+import { ensureVideoconferenciaSchema } from '../../_schema.js'
 
 export default async function handler(request, response) {
     if (request.method !== 'PATCH') {
@@ -14,6 +15,8 @@ export default async function handler(request, response) {
     const { id } = request.query
 
     try {
+        await ensureVideoconferenciaSchema()
+
         const [solicitacao] = await sql`
             SELECT *
             FROM solicitacoes
@@ -65,7 +68,6 @@ export default async function handler(request, response) {
 
         const observacoesDaAgenda = [
             solicitacao.observacoes,
-            solicitacao.local_fisico ? `Local fisico: ${solicitacao.local_fisico}` : '',
             solicitacao.email_responsavel ? `Email do responsavel: ${solicitacao.email_responsavel}` : '',
             solicitacao.solicitar_link ? 'Solicitante pediu criacao do link da videoconferencia.' : '',
         ].filter(Boolean).join('\n')
@@ -74,6 +76,7 @@ export default async function handler(request, response) {
             INSERT INTO videoconferencias (
                 nome,
                 plataforma,
+                local_fisico,
                 data,
                 horario,
                 prioridade,
@@ -86,6 +89,7 @@ export default async function handler(request, response) {
             VALUES (
                 ${solicitacao.nome_videoconferencia},
                 ${solicitacao.local_plataforma},
+                ${solicitacao.local_fisico || null},
                 ${solicitacao.data},
                 ${solicitacao.horario},
                 ${solicitacao.prioridade},

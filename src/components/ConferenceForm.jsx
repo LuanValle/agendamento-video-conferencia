@@ -4,6 +4,7 @@ import { normalizeSector } from "../utils/formatters";
 const emptyForm = {
   name: "",
   platform: "",
+  physicalLocation: "",
   date: "",
   endDate: "",
   time: "",
@@ -36,6 +37,7 @@ const recurrenceOptions = [
 const fields = {
   name: "conference-name",
   platform: "conference-platform",
+  physicalLocation: "conference-physical-location",
   date: "conference-date",
   endDate: "conference-end-date",
   time: "conference-time",
@@ -96,7 +98,7 @@ function ConferenceForm({
         </div>
 
         <div className="form-field">
-          <label htmlFor={fields.platform}>Local ou plataforma *</label>
+          <label htmlFor={fields.platform}>Plataforma *</label>
           <select
             id={fields.platform}
             value={data.platform}
@@ -115,6 +117,16 @@ function ConferenceForm({
           {errors.platform && (
             <small id={`${fields.platform}-error`}>{errors.platform}</small>
           )}
+        </div>
+
+        <div className="form-field">
+          <label htmlFor={fields.physicalLocation}>Local da videoconferencia</label>
+          <input
+            id={fields.physicalLocation}
+            value={data.physicalLocation}
+            onChange={(event) => updateField("physicalLocation", event.target.value.toUpperCase())}
+            placeholder="Ex.: AUDITORIO CGS"
+          />
         </div>
 
         <div className="form-field">

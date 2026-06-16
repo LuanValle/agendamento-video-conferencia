@@ -126,6 +126,7 @@ async function criarVideoconferencia(request, response) {
     const {
         nome,
         plataforma,
+        local_fisico,
         data,
         data_fim,
         horario,
@@ -190,6 +191,7 @@ async function criarVideoconferencia(request, response) {
             INSERT INTO videoconferencias (
             nome,
             plataforma,
+            local_fisico,
             data,
             data_fim,
             horario,
@@ -204,6 +206,7 @@ async function criarVideoconferencia(request, response) {
         VALUES (
             ${nome.trim()},
             ${plataforma.trim()},
+            ${local_fisico?.trim() || null},
             ${occurrence.data},
             ${occurrence.data_fim},
             ${horario.trim()},
@@ -231,6 +234,7 @@ async function criarVideoconferencia(request, response) {
             ids: videoconferencias.map((item) => item.id),
             nome: nome.trim(),
             plataforma: plataforma.trim(),
+            local_fisico: local_fisico?.trim() || null,
             data,
             data_fim: data_fim || null,
             horario: horario.trim(),

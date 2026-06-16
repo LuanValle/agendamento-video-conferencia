@@ -14,6 +14,7 @@ function temCampoObrigatorioVazio(dados) {
 const pickAuditFields = (videoconferencia) => ({
     nome: videoconferencia.nome,
     plataforma: videoconferencia.plataforma,
+    local_fisico: videoconferencia.local_fisico,
     data: videoconferencia.data,
     data_fim: videoconferencia.data_fim,
     horario: videoconferencia.horario,
@@ -40,6 +41,7 @@ async function atualizarVideoconferencia(request, response) {
     const {
         nome,
         plataforma,
+        local_fisico,
         data,
         data_fim,
         horario,
@@ -109,6 +111,7 @@ async function atualizarVideoconferencia(request, response) {
         UPDATE videoconferencias
         SET nome = ${nome.trim()},
             plataforma = ${plataforma.trim()},
+            local_fisico = ${local_fisico?.trim() || null},
             data = ${data.trim()},
             data_fim = ${dataFim},
             horario = ${horario.trim()},

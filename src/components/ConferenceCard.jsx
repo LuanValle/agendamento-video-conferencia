@@ -8,6 +8,8 @@ import {
 } from '../utils/dateUtils'
 import { buildCallTicketText } from '../utils/callTicketTemplate'
 
+const SISRECIM_TICKET_URL = 'https://sisrecim.ctim.mb/front/ticket.form.php'
+
 const copyToClipboard = async (text) => {
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(text)
@@ -29,6 +31,7 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
   const statusClass = getVisualClassByProximity(conference)
   const situation = getSituation(conference)
   const [copyStatus, setCopyStatus] = useState('')
+  const [sisrecimStatus, setSisrecimStatus] = useState('')
 
   const handleCopyTicket = async () => {
     try {
@@ -38,6 +41,19 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
     } catch {
       setCopyStatus('error')
       window.setTimeout(() => setCopyStatus(''), 2200)
+    }
+  }
+
+  const handleOpenSisrecimTicket = async () => {
+    window.open(SISRECIM_TICKET_URL, '_blank', 'noopener,noreferrer')
+
+    try {
+      await copyToClipboard(buildCallTicketText(conference))
+      setSisrecimStatus('copied')
+      window.setTimeout(() => setSisrecimStatus(''), 1800)
+    } catch {
+      setSisrecimStatus('error')
+      window.setTimeout(() => setSisrecimStatus(''), 2200)
     }
   }
 
@@ -112,6 +128,15 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
           >
             <Copy size={17} />
             <span>{copyStatus === 'copied' ? 'Copiado' : copyStatus === 'error' ? 'Erro ao copiar' : 'Copiar chamado'}</span>
+          </button>
+          <button
+            className={sisrecimStatus === 'copied' ? 'icon-button copied' : 'icon-button'}
+            type="button"
+            onClick={handleOpenSisrecimTicket}
+            title="Copiar modelo e abrir chamado no SisRecim"
+          >
+            <ExternalLink size={17} />
+            <span>{sisrecimStatus === 'copied' ? 'Copiado' : sisrecimStatus === 'error' ? 'Erro ao copiar' : 'Abrir SisRecim'}</span>
           </button>
           {conference.completed ? (
             <button className="icon-button" type="button" onClick={() => onReopen(conference.id)} title="Reabrir">

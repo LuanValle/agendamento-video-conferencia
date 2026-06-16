@@ -67,12 +67,12 @@ button {
 
 .entry-hero,
 .login-panel {
-  width: min(920px, 100%);
+  width: min(720px, 100%);
   border: 1px solid rgba(220, 227, 238, 0.95);
   border-radius: 8px;
   background: #ffffff;
   box-shadow: var(--shadow);
-  padding: clamp(26px, 5vw, 54px);
+  padding: clamp(30px, 5vw, 58px);
 }
 
 .entry-hero.compact {
@@ -82,9 +82,7 @@ button {
 
 .entry-brand {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
-  gap: clamp(24px, 4vw, 56px);
-  align-items: center;
+  justify-items: center;
 }
 
 .entry-brand-copy {
@@ -100,12 +98,12 @@ button {
 .entry-logo-frame {
   display: grid;
   place-items: center;
-  min-height: 178px;
-  padding: 8px;
+  min-height: 300px;
+  padding: 0;
 }
 
 .entry-logo-frame img {
-  width: clamp(128px, 16vw, 178px);
+  width: clamp(260px, 38vw, 420px);
   max-width: 100%;
   height: auto;
   object-fit: contain;
@@ -133,6 +131,14 @@ button {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-top: 28px;
+}
+
+.entry-actions-primary {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px);
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
 }
 
 .admin-shortcuts {
@@ -338,6 +344,40 @@ button {
   word-break: break-word;
 }
 
+.entry-action-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 52px;
+  border: 1px solid #1769aa;
+  border-radius: 8px;
+  background: #1769aa;
+  color: #ffffff;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.entry-action-card:hover {
+  background: #0d4f86;
+  border-color: #0d4f86;
+}
+
+.entry-login-link {
+  justify-self: center;
+  color: #0d4f86;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.entry-login-link:hover {
+  text-decoration: underline;
+}
+
 .login-panel {
   width: min(480px, 100%);
 }
@@ -451,6 +491,10 @@ button {
 
 .site-footer strong {
   color: #172033;
+}
+
+.entry-page + .site-footer {
+  display: none;
 }
 
 .app-header {
@@ -1450,13 +1494,13 @@ dd {
   }
 
   .entry-logo-frame {
-    min-height: 96px;
-    justify-items: start;
+    min-height: 220px;
+    justify-items: center;
     padding: 0;
   }
 
   .entry-logo-frame img {
-    width: 92px;
+    width: min(300px, 82vw);
   }
 
   .backup-actions,

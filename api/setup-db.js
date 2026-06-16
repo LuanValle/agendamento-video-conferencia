@@ -9,18 +9,28 @@ export default async function handler(request, response) {
             nip TEXT NOT NULL,
             setor TEXT NOT NULL,
             contato TEXT NOT NULL,
+            email_responsavel TEXT,
             nome_videoconferencia TEXT NOT NULL,
             local_plataforma TEXT NOT NULL,
             data DATE NOT NULL,
             horario TIME NOT NULL,
             prioridade TEXT NOT NULL,
             link TEXT,
+            solicitar_link BOOLEAN NOT NULL DEFAULT false,
             observacoes TEXT,
             status TEXT NOT NULL DEFAULT 'pendente',
             motivo_rejeicao TEXT,
             criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             atualizado_em TIMESTAMP
         )`
+        await sql`
+            ALTER TABLE solicitacoes
+            ADD COLUMN IF NOT EXISTS email_responsavel TEXT
+        `
+        await sql`
+            ALTER TABLE solicitacoes
+            ADD COLUMN IF NOT EXISTS solicitar_link BOOLEAN NOT NULL DEFAULT false
+        `
         await sql`
         CREATE TABLE IF NOT EXISTS videoconferencias (
             id SERIAL PRIMARY KEY,

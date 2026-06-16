@@ -11,12 +11,14 @@ const initialForm = {
   nip: '',
   department: '',
   contact: '',
+  responsibleEmail: '',
   conferenceName: '',
   platform: '',
   date: '',
   time: '',
   priority: '',
   link: '',
+  requestLink: false,
   notes: '',
 }
 
@@ -46,12 +48,14 @@ const mapFormToApiPayload = (form) => ({
   nip: form.nip.trim(),
   setor: normalizeSector(form.department).trim(),
   contato: form.contact.trim(),
+  email_responsavel: form.responsibleEmail.trim(),
   nome_videoconferencia: form.conferenceName.trim(),
   local_plataforma: form.platform.trim(),
   data: form.date.trim(),
   horario: form.time.trim(),
   prioridade: form.priority.trim(),
   link: form.link.trim(),
+  solicitar_link: Boolean(form.requestLink && !form.link.trim()),
   observacoes: form.notes.trim(),
 })
 
@@ -190,6 +194,15 @@ function SolicitationPage() {
               />
             </label>
             <label className="form-field">
+              Email do responsável
+              <input
+                type="email"
+                value={form.responsibleEmail}
+                onChange={(event) => updateField('responsibleEmail', event.target.value)}
+                placeholder="responsavel@exemplo.mil.br"
+              />
+            </label>
+            <label className="form-field">
               Nome da videoconferência *
               <input
                 value={form.conferenceName}
@@ -230,9 +243,21 @@ function SolicitationPage() {
               Link da videoconferência
               <input
                 value={form.link}
-                onChange={(event) => updateField('link', event.target.value)}
+                onChange={(event) => {
+                  updateField('link', event.target.value)
+                  if (event.target.value.trim()) updateField('requestLink', false)
+                }}
                 placeholder="https://..."
               />
+            </label>
+            <label className="form-field checkbox-field">
+              <input
+                type="checkbox"
+                checked={form.requestLink}
+                disabled={Boolean(form.link.trim())}
+                onChange={(event) => updateField('requestLink', event.target.checked)}
+              />
+              <span>Não tenho link de videoconferência e desejo solicitar a criação.</span>
             </label>
             <label className="form-field full-width">
               Observações

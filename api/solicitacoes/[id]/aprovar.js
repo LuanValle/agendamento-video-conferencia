@@ -62,6 +62,12 @@ export default async function handler(request, response) {
             })
         }
 
+        const observacoesDaAgenda = [
+            solicitacao.observacoes,
+            solicitacao.email_responsavel ? `Email do responsavel: ${solicitacao.email_responsavel}` : '',
+            solicitacao.solicitar_link ? 'Solicitante pediu criacao do link da videoconferencia.' : '',
+        ].filter(Boolean).join('\n')
+
         const [videoconferencia] = await sql`
             INSERT INTO videoconferencias (
                 nome,
@@ -84,7 +90,7 @@ export default async function handler(request, response) {
                 ${solicitacao.nome},
                 ${solicitacao.setor},
                 ${solicitacao.link},
-                ${solicitacao.observacoes},
+                ${observacoesDaAgenda || null},
                 ${solicitacao.id}
             )
             RETURNING *

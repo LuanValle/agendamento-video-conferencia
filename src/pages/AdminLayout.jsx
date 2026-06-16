@@ -172,6 +172,16 @@ function AdminLayout() {
                 <dt>Contato</dt>
                 <dd>{firstPendingRequest.contact}</dd>
               </div>
+              {firstPendingRequest.responsibleEmail && (
+                <div>
+                  <dt>Email</dt>
+                  <dd>{firstPendingRequest.responsibleEmail}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Link</dt>
+                <dd>{firstPendingRequest.link ? 'Informado' : firstPendingRequest.requestLink ? 'Solicitou criação' : 'Não informado'}</dd>
+              </div>
               <div>
                 <dt>Setor</dt>
                 <dd>{firstPendingRequest.department}</dd>

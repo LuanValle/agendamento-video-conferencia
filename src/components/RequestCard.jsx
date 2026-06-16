@@ -41,6 +41,16 @@ function RequestCard({ request, onApprove, onReject, actionLoadingId }) {
           <dt>Contato</dt>
           <dd>{request.contact}</dd>
         </div>
+        {request.responsibleEmail && (
+          <div>
+            <dt>Email</dt>
+            <dd>{request.responsibleEmail}</dd>
+          </div>
+        )}
+        <div>
+          <dt>Link</dt>
+          <dd>{request.link ? 'Informado' : request.requestLink ? 'Solicitou criação' : 'Não informado'}</dd>
+        </div>
       </dl>
 
       {request.notes && <p className="notes">{request.notes}</p>}

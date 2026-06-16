@@ -1,6 +1,7 @@
 import { requireAdmin } from './_auth.js'
 import { sql } from './_db.js'
 import { readJsonBody, sendJsonParseError } from './_request.js'
+import { ensureSolicitacaoSchema } from './_schema.js'
 import { isPastDate, isValidContact, isValidNip, isValidUrlOrEmpty, normalizeSector } from './_validators.js'
 
 const camposObrigatorios = [
@@ -31,6 +32,7 @@ function parsePositiveInteger(value, fallback) {
 async function listarSolicitacoes(request, response) {
     // Listar solicitacoes e uma acao administrativa, por isso exige login.
     if (requireAdmin(request, response)) return
+    await ensureSolicitacaoSchema()
 
     const status = String(request.query?.status || '').trim().toLowerCase()
     const shouldPaginate =
@@ -116,12 +118,14 @@ async function criarSolicitacao(request, response) {
         nome,
         nip,
         contato,
+        email_responsavel,
         nome_videoconferencia,
         local_plataforma,
         data,
         horario,
         prioridade,
         link,
+        solicitar_link,
         observacoes,
     } = body
 
@@ -151,6 +155,8 @@ async function criarSolicitacao(request, response) {
         })
     }
 
+    await ensureSolicitacaoSchema()
+
     // Evita envio duplo da mesma solicitação pendente.
     const [solicitacaoDuplicada] = await sql`
         SELECT id
@@ -175,24 +181,28 @@ async function criarSolicitacao(request, response) {
             nip,
             setor,
             contato,
+            email_responsavel,
             nome_videoconferencia,
             local_plataforma,
             data,
             horario,
             prioridade,
             link,
+            solicitar_link,
             observacoes
         ) VALUES (
             ${nome.trim()},
             ${nip.trim()},
             ${setor},
             ${contato.trim()},
+            ${email_responsavel?.trim() || null},
             ${nome_videoconferencia.trim()},
             ${local_plataforma.trim()},
             ${data.trim()},
             ${horario.trim()},
             ${prioridade.trim()},
             ${link?.trim() || null},
+            ${Boolean(solicitar_link) && !link?.trim()},
             ${observacoes?.trim() || null}
         )
         RETURNING *

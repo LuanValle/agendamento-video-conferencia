@@ -480,6 +480,17 @@ h2 {
   gap: 7px;
 }
 
+.checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  align-self: end;
+  min-height: 44px;
+}
+
+.checkbox-field span {
+  line-height: 1.35;
+}
+
 label {
   color: #344056;
   font-weight: 700;
@@ -499,6 +510,11 @@ textarea {
 
 textarea {
   resize: vertical;
+}
+
+.checkbox-field input {
+  width: 18px;
+  height: 18px;
 }
 
 input:focus,

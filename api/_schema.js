@@ -1,6 +1,23 @@
 import { sql } from './_db.js'
 
 let videoconferenciaSchemaReady = false
+let solicitacaoSchemaReady = false
+
+export async function ensureSolicitacaoSchema() {
+    if (solicitacaoSchemaReady) return
+
+    await sql`
+        ALTER TABLE solicitacoes
+        ADD COLUMN IF NOT EXISTS email_responsavel TEXT
+    `
+
+    await sql`
+        ALTER TABLE solicitacoes
+        ADD COLUMN IF NOT EXISTS solicitar_link BOOLEAN NOT NULL DEFAULT false
+    `
+
+    solicitacaoSchemaReady = true
+}
 
 export async function ensureVideoconferenciaSchema() {
     if (videoconferenciaSchemaReady) return

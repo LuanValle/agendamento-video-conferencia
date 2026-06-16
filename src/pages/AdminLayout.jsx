@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Home, Inbox, LayoutDashboard, List, LogOut, PlusCircle, XCircle } from 'lucide-react'
+import { CalendarDays, FileText, Home, Inbox, LayoutDashboard, List, LogOut, Menu, PanelLeftClose, PlusCircle, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import ConfirmModal from '../components/ConfirmModal'
@@ -19,6 +19,7 @@ const priorityClassByName = {
 
 function AdminLayout() {
   const navigate = useNavigate()
+  const [isSidebarHidden, setIsSidebarHidden] = useState(() => localStorage.getItem('adminSidebarHidden') === 'true')
   const [pendingRequests, setPendingRequests] = useState([])
   const [actionLoadingId, setActionLoadingId] = useState(null)
   const [confirmingRequest, setConfirmingRequest] = useState(null)
@@ -44,6 +45,10 @@ function AdminLayout() {
     const refreshPendingRequests = () => fetchPendingRequests()
     return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshPendingRequests)
   }, [fetchPendingRequests])
+
+  useEffect(() => {
+    localStorage.setItem('adminSidebarHidden', String(isSidebarHidden))
+  }, [isSidebarHidden])
 
   const handleLogout = async () => {
     // Limpa a sessão visual e também pede para a API remover o cookie administrativo.
@@ -100,11 +105,24 @@ function AdminLayout() {
     priorityClassByName[firstPendingRequest?.priority] || 'medium'
 
   return (
-    <div className="admin-shell">
+    <div className={isSidebarHidden ? 'admin-shell sidebar-hidden' : 'admin-shell'}>
+      {!isSidebarHidden && (
       <aside className="admin-sidebar">
-        <div>
-          <p className="eyebrow">Administração</p>
-          <h1>Videoconferências</h1>
+        <div className="admin-sidebar-header">
+          <div>
+            <p className="eyebrow">Administração</p>
+            <h1>Videoconferências</h1>
+          </div>
+          <button
+            className="sidebar-toggle-button"
+            type="button"
+            onClick={() => setIsSidebarHidden(true)}
+            aria-label="Esconder menu lateral"
+            aria-expanded="true"
+            title="Esconder menu"
+          >
+            <PanelLeftClose size={18} />
+          </button>
         </div>
         <nav className="admin-nav" aria-label="Navegação administrativa">
           <NavLink to="/admin" end>
@@ -150,7 +168,25 @@ function AdminLayout() {
           Sair
         </button>
       </aside>
+      )}
       <main className="admin-content">
+        {isSidebarHidden && (
+          <button
+            className="sidebar-restore-button no-print"
+            type="button"
+            onClick={() => setIsSidebarHidden(false)}
+            aria-expanded="false"
+          >
+            <Menu size={18} />
+            Mostrar menu
+            {pendingRequests.length > 0 && (
+              <span className="pending-badge" aria-label={`${pendingRequests.length} solicitações pendentes`}>
+                {pendingRequests.length}
+              </span>
+            )}
+          </button>
+        )}
+
         <Outlet />
 
         {firstPendingRequest && (

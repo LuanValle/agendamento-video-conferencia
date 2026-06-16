@@ -440,6 +440,10 @@ button {
   background: #eef2f7;
 }
 
+.admin-shell.sidebar-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .admin-sidebar {
   position: sticky;
   top: 0;
@@ -452,10 +456,51 @@ button {
   padding: 24px;
 }
 
+.admin-sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
 .admin-sidebar h1 {
   margin: 0;
   color: #172033;
   font-size: 1.4rem;
+}
+
+.sidebar-toggle-button,
+.sidebar-restore-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #dce3ee;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344056;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.sidebar-toggle-button {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+}
+
+.sidebar-restore-button {
+  margin-bottom: 18px;
+  padding: 10px 13px;
+}
+
+.sidebar-toggle-button:hover,
+.sidebar-restore-button:hover {
+  transform: translateY(-1px);
+  border-color: #b8c7da;
+  background: #e8f3fb;
+  color: #0d4f86;
 }
 
 .admin-nav {

@@ -44,17 +44,19 @@ function ConferenceCard({ conference, onEdit, onDelete, onComplete, onReopen }) 
     }
   }
 
-  const handleOpenSisrecimTicket = async () => {
+  const handleOpenSisrecimTicket = () => {
+    const copyPromise = copyToClipboard(buildCallTicketText(conference))
     window.open(SISRECIM_TICKET_URL, '_blank', 'noopener,noreferrer')
 
-    try {
-      await copyToClipboard(buildCallTicketText(conference))
-      setSisrecimStatus('copied')
-      window.setTimeout(() => setSisrecimStatus(''), 1800)
-    } catch {
-      setSisrecimStatus('error')
-      window.setTimeout(() => setSisrecimStatus(''), 2200)
-    }
+    copyPromise
+      .then(() => {
+        setSisrecimStatus('copied')
+        window.setTimeout(() => setSisrecimStatus(''), 1800)
+      })
+      .catch(() => {
+        setSisrecimStatus('error')
+        window.setTimeout(() => setSisrecimStatus(''), 2200)
+      })
   }
 
   return (

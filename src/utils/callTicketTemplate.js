@@ -101,9 +101,11 @@ const buildDateLine = (conference, endTime) => {
     : ''
   const dateText = endDate ? `${startDate} a ${endDate}` : startDate
   const startTime = formatTimeZoneQ(conference.time)
-  const timeText = endTime ? `${startTime || 'INICIO NAO INFORMADO'} - ${endTime}` : 'DIA TODO'
+  const timeText = endTime
+    ? `${startTime || 'INICIO NAO INFORMADO'} - ${endTime}`
+    : startTime || 'INICIO NAO INFORMADO'
 
-  return `${dateText} - (${timeText})`
+  return `${dateText} - ${timeText}`
 }
 
 export const buildCallTicketText = (conference) => {

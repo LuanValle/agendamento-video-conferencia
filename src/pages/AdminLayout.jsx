@@ -186,6 +186,12 @@ function AdminLayout() {
                 <dt>Link</dt>
                 <dd>{firstPendingRequest.link ? 'Informado' : firstPendingRequest.requestLink ? 'Solicitou criação' : 'Não informado'}</dd>
               </div>
+              {firstPendingRequest.physicalLocation && (
+                <div>
+                  <dt>Local</dt>
+                  <dd>{firstPendingRequest.physicalLocation}</dd>
+                </div>
+              )}
               <div>
                 <dt>Setor</dt>
                 <dd>{firstPendingRequest.department}</dd>

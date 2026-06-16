@@ -65,6 +65,7 @@ export default async function handler(request, response) {
 
         const observacoesDaAgenda = [
             solicitacao.observacoes,
+            solicitacao.local_fisico ? `Local fisico: ${solicitacao.local_fisico}` : '',
             solicitacao.email_responsavel ? `Email do responsavel: ${solicitacao.email_responsavel}` : '',
             solicitacao.solicitar_link ? 'Solicitante pediu criacao do link da videoconferencia.' : '',
         ].filter(Boolean).join('\n')
@@ -114,6 +115,7 @@ export default async function handler(request, response) {
                 nome_videoconferencia: solicitacao.nome_videoconferencia,
                 solicitante: solicitacao.nome,
                 setor: solicitacao.setor,
+                local_fisico: solicitacao.local_fisico,
                 data: solicitacao.data,
                 horario: solicitacao.horario,
             },

@@ -12,6 +12,7 @@ export default async function handler(request, response) {
             email_responsavel TEXT,
             nome_videoconferencia TEXT NOT NULL,
             local_plataforma TEXT NOT NULL,
+            local_fisico TEXT,
             data DATE NOT NULL,
             horario TIME NOT NULL,
             prioridade TEXT NOT NULL,
@@ -30,6 +31,10 @@ export default async function handler(request, response) {
         await sql`
             ALTER TABLE solicitacoes
             ADD COLUMN IF NOT EXISTS solicitar_link BOOLEAN NOT NULL DEFAULT false
+        `
+        await sql`
+            ALTER TABLE solicitacoes
+            ADD COLUMN IF NOT EXISTS local_fisico TEXT
         `
         await sql`
         CREATE TABLE IF NOT EXISTS videoconferencias (

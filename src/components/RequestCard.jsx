@@ -22,9 +22,15 @@ function RequestCard({ request, onApprove, onReject, actionLoadingId }) {
           <dd>{request.conferenceName}</dd>
         </div>
         <div>
-          <dt>Local/Plataforma</dt>
+          <dt>Plataforma</dt>
           <dd>{request.platform}</dd>
         </div>
+        {request.physicalLocation && (
+          <div>
+            <dt>Local</dt>
+            <dd>{request.physicalLocation}</dd>
+          </div>
+        )}
         <div>
           <dt>Data</dt>
           <dd>{formatDatePtBr(request.date)}</dd>

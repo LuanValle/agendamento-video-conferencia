@@ -45,6 +45,11 @@ export async function ensureSolicitacaoSchema() {
         ADD COLUMN IF NOT EXISTS solicitar_link BOOLEAN NOT NULL DEFAULT false
     `
 
+    await sql`
+        ALTER TABLE solicitacoes
+        ADD COLUMN IF NOT EXISTS local_fisico TEXT
+    `
+
     solicitacaoSchemaReady = true
 }
 

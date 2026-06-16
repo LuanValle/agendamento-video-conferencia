@@ -14,6 +14,7 @@ const initialForm = {
   responsibleEmail: '',
   conferenceName: '',
   platform: '',
+  physicalLocation: '',
   date: '',
   time: '',
   priority: '',
@@ -51,6 +52,7 @@ const mapFormToApiPayload = (form) => ({
   email_responsavel: form.responsibleEmail.trim(),
   nome_videoconferencia: form.conferenceName.trim(),
   local_plataforma: form.platform.trim(),
+  local_fisico: form.physicalLocation.trim(),
   data: form.date.trim(),
   horario: form.time.trim(),
   prioridade: form.priority.trim(),
@@ -210,7 +212,7 @@ function SolicitationPage() {
               />
             </label>
             <label className="form-field">
-              Local ou plataforma *
+              Plataforma *
               <select value={form.platform} onChange={(event) => updateField('platform', event.target.value)}>
                 <option value="">Selecione</option>
                 {platforms.map((platform) => (
@@ -219,6 +221,14 @@ function SolicitationPage() {
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="form-field">
+              Local da videoconferencia
+              <input
+                value={form.physicalLocation}
+                onChange={(event) => updateUppercaseField('physicalLocation', event.target.value)}
+                placeholder="Ex.: AUDITORIO CGS"
+              />
             </label>
             <label className="form-field">
               Data *

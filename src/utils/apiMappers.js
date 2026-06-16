@@ -9,6 +9,7 @@ export const apiToRequest = (item) => ({
   responsibleEmail: item.email_responsavel || '',
   conferenceName: item.nome_videoconferencia,
   platform: item.local_plataforma,
+  physicalLocation: item.local_fisico || '',
   date: item.data?.slice(0, 10) || '',
   time: item.horario?.slice(0, 5) || '',
   priority: item.prioridade,

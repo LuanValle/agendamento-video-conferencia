@@ -30,6 +30,18 @@ const formatDate = (value) => {
 
 const formatTime = (value) => String(value || '').slice(0, 5) || '--'
 
+const normalizeDetails = (details) => {
+  if (!details) return {}
+  if (typeof details === 'string') {
+    try {
+      return JSON.parse(details)
+    } catch {
+      return {}
+    }
+  }
+  return details
+}
+
 const getAgendaDateText = (item) => {
   const start = formatDate(item.data)
   const end = item.data_fim ? formatDate(item.data_fim) : ''
@@ -37,20 +49,87 @@ const getAgendaDateText = (item) => {
 }
 
 const getLogTitle = (log) => {
-  const details = log.detalhes || {}
-  return details.nome_videoconferencia || details.nome || details.depois?.nome || details.antes?.nome || 'Registro administrativo'
+  const details = normalizeDetails(log.detalhes)
+  const title = details.nome_videoconferencia || details.nome || details.depois?.nome || details.antes?.nome
+  const fallback = log.entidade === 'videoconferencia' ? 'Videoconferencia' : 'Solicitacao'
+  return title || `${fallback} ${log.entidade_id || ''}`.trim()
 }
 
 const getLogDescription = (log) => {
-  const details = log.detalhes || {}
+  const details = normalizeDetails(log.detalhes)
   const parts = [
+    log.entidade ? `Entidade: ${log.entidade}` : '',
+    log.entidade_id ? `ID: ${log.entidade_id}` : '',
     details.solicitante ? `Solicitante: ${details.solicitante}` : '',
     details.setor ? `Setor: ${details.setor}` : '',
+    details.depois?.setor ? `Setor: ${details.depois.setor}` : '',
+    details.data ? `Data: ${formatDate(details.data)}` : '',
+    details.depois?.data ? `Data: ${formatDate(details.depois.data)}` : '',
+    details.horario ? `Horario: ${formatTime(details.horario)}` : '',
+    details.depois?.horario ? `Horario: ${formatTime(details.depois.horario)}` : '',
     details.quantidade ? `Quantidade: ${details.quantidade}` : '',
     details.motivo_rejeicao ? `Motivo: ${details.motivo_rejeicao}` : '',
   ].filter(Boolean)
 
   return parts.join(' - ')
+}
+
+const hasValueChanged = (before, after, field) =>
+  String(before?.[field] ?? '') !== String(after?.[field] ?? '')
+
+const buildChangeList = (log) => {
+  const details = normalizeDetails(log.detalhes)
+  const before = details.antes
+  const after = details.depois
+
+  if (!before || !after) return []
+
+  const fields = [
+    ['nome', 'Nome'],
+    ['plataforma', 'Plataforma'],
+    ['data', 'Data'],
+    ['data_fim', 'Data final'],
+    ['horario', 'Horario'],
+    ['prioridade', 'Prioridade'],
+    ['responsavel', 'Responsavel'],
+    ['setor', 'Setor'],
+    ['concluida', 'Concluida'],
+  ]
+
+  return fields
+    .filter(([field]) => hasValueChanged(before, after, field))
+    .map(([field, label]) => {
+      const formatValue = field.includes('data')
+        ? formatDate
+        : field === 'horario'
+          ? formatTime
+          : (value) => {
+              if (typeof value === 'boolean') return value ? 'Sim' : 'Nao'
+              return value || '--'
+            }
+
+      return `${label}: ${formatValue(before[field])} -> ${formatValue(after[field])}`
+    })
+}
+
+const getLogMetaItems = (log) => {
+  const details = normalizeDetails(log.detalhes)
+  const before = details.antes || {}
+  const after = details.depois || {}
+  const data = details.data || after.data || before.data
+  const horario = details.horario || after.horario || before.horario
+  const setor = details.setor || after.setor || before.setor
+
+  return [
+    ['Entidade', log.entidade],
+    ['ID', log.entidade_id],
+    ['Data', data ? formatDate(data) : ''],
+    ['Horario', horario ? formatTime(horario) : ''],
+    ['Setor', setor],
+    ['Solicitante', details.solicitante],
+    ['Quantidade', details.quantidade],
+    ['Motivo', details.motivo_rejeicao],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== '')
 }
 
 function AuditPage() {
@@ -270,16 +349,38 @@ function AuditPage() {
 
         {!loading && logs.length > 0 && (
           <div className="audit-log-list">
-            {logs.map((log) => (
-              <article className="audit-log-item" key={log.id}>
-                <div>
-                  <strong>{actionLabels[log.acao] || log.acao}</strong>
-                  <span>{formatDateTime(log.criado_em)} - {log.usuario || 'admin'}</span>
-                </div>
-                <p>{getLogTitle(log)}</p>
-                {getLogDescription(log) && <small>{getLogDescription(log)}</small>}
-              </article>
-            ))}
+            {logs.map((log) => {
+              const metaItems = getLogMetaItems(log)
+              const changes = buildChangeList(log)
+
+              return (
+                <article className="audit-log-item" key={log.id}>
+                  <div>
+                    <strong>{actionLabels[log.acao] || log.acao}</strong>
+                    <span>{formatDateTime(log.criado_em)} - {log.usuario || 'admin'}</span>
+                  </div>
+                  <p>{getLogTitle(log)}</p>
+                  {getLogDescription(log) && <small>{getLogDescription(log)}</small>}
+                  {metaItems.length > 0 && (
+                    <dl className="audit-detail-grid">
+                      {metaItems.map(([label, value]) => (
+                        <div key={`${log.id}-${label}`}>
+                          <dt>{label}</dt>
+                          <dd>{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {changes.length > 0 && (
+                    <ul className="audit-change-list">
+                      {changes.map((change) => (
+                        <li key={`${log.id}-${change}`}>{change}</li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              )
+            })}
           </div>
         )}
       </section>

@@ -275,6 +275,38 @@ button {
   overflow-wrap: anywhere;
 }
 
+.audit-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin: 4px 0 0;
+}
+
+.audit-detail-grid div {
+  min-width: 0;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 8px 10px;
+}
+
+.audit-detail-grid dt {
+  font-size: 0.68rem;
+}
+
+.audit-detail-grid dd {
+  margin-top: 3px;
+  font-size: 0.85rem;
+}
+
+.audit-change-list {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: #344056;
+  font-weight: 800;
+}
+
 .entry-card {
   display: grid;
   gap: 10px;

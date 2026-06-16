@@ -102,7 +102,11 @@ function AdminDashboard() {
         </Link>
         <Link className="entry-card" to="/admin/agenda">
           <strong>Agenda aprovada</strong>
-          <span>Ver videoconferências aprovadas e cadastradas.</span>
+          <span>Ver videoconferencias aprovadas e acompanhar a fila.</span>
+        </Link>
+        <Link className="entry-card" to="/admin/cadastro">
+          <strong>Cadastrar videoconferencia</strong>
+          <span>Registrar uma VC manualmente fora da fila da agenda.</span>
         </Link>
         <Link className="entry-card" to="/admin/auditoria">
           <strong>Auditoria</strong>

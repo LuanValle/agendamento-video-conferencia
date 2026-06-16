@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Home, Inbox, LayoutDashboard, List, LogOut, XCircle } from 'lucide-react'
+import { CalendarDays, FileText, Home, Inbox, LayoutDashboard, List, LogOut, PlusCircle, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import ConfirmModal from '../components/ConfirmModal'
@@ -123,6 +123,10 @@ function AdminLayout() {
           <NavLink to="/admin/agenda">
             <CalendarDays size={18} />
             Agenda
+          </NavLink>
+          <NavLink to="/admin/cadastro">
+            <PlusCircle size={18} />
+            Cadastro
           </NavLink>
           <NavLink to="/admin/auditoria">
             <FileText size={18} />

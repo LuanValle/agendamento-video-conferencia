@@ -7,6 +7,7 @@ import AdminLogin from './pages/AdminLogin'
 import AuditPage from './pages/AuditPage'
 import AllRequests from './pages/AllRequests'
 import ApprovedAgenda from './pages/ApprovedAgenda'
+import ConferenceRegistration from './pages/ConferenceRegistration'
 import HomePage from './pages/HomePage'
 import NotFound from './pages/NotFound'
 import PendingRequests from './pages/PendingRequests'
@@ -39,6 +40,8 @@ function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="solicitacoes" element={<PendingRequests />} />
+          <Route path="cadastro" element={<ConferenceRegistration />} />
+          <Route path="cadastro/:id" element={<ConferenceRegistration />} />
           <Route path="agenda" element={<ApprovedAgenda />} />
           <Route path="auditoria" element={<AuditPage />} />
           <Route path="rejeitadas" element={<RejectedRequests />} />

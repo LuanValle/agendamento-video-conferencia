@@ -1,7 +1,7 @@
-import { Monitor, MonitorOff } from 'lucide-react'
+import { Monitor, MonitorOff, PlusCircle } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../components/ConfirmModal'
-import ConferenceForm, { emptyForm } from '../components/ConferenceForm'
 import ConferenceList from '../components/ConferenceList'
 import Dashboard from '../components/Dashboard'
 import ExportActions from '../components/ExportActions'
@@ -19,7 +19,6 @@ import {
 import { exportCsv, exportJsonBackup, importJsonBackup } from '../utils/exportUtils'
 import { AGENDA_CHANGED_EVENT, notifyAgendaChanged, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
-import { validateConference } from '../utils/validationUtils'
 
 const isHighPriority = (priority) => {
   // Remove acentos para aceitar tanto "Critica" quanto "Critica" com acento.
@@ -64,15 +63,12 @@ function searchConferences(conferences, searchTerm) {
 }
 
 function ApprovedAgenda() {
+  const navigate = useNavigate()
   const [conferences, setConferences] = useState([])
-  const [formData, setFormData] = useState(emptyForm)
-  const [editingId, setEditingId] = useState(null)
-  const [errors, setErrors] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilter, setActiveFilter] = useState('all')
   const [message, setMessage] = useState('')
   const [presentationMode, setPresentationMode] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null)
@@ -141,12 +137,6 @@ function ApprovedAgenda() {
     }),
     [conferences],
   )
-
-  const resetForm = () => {
-    setFormData(emptyForm)
-    setEditingId(null)
-    setErrors({})
-  }
 
   const deleteConference = async (id) => {
     try {
@@ -226,102 +216,9 @@ function ApprovedAgenda() {
     updateConferenceCompletion(id, false)
   }
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
-    if (isSaving) return
-
-    // Remove espacos extras antes de validar e enviar os dados.
-    const trimmedData = Object.fromEntries(
-      Object.entries(formData).map(([key, value]) => [
-        key,
-        typeof value === 'string' ? value.trim() : value,
-      ]),
-    )
-
-    const validationErrors = validateConference(trimmedData)
-    setErrors(validationErrors)
-
-    if (Object.keys(validationErrors).length) {
-      setMessage('Revise os campos destacados antes de salvar.')
-      return
-    }
-
-    setIsSaving(true)
-
-    try {
-      if (editingId) {
-        // PATCH atualiza uma videoconferencia que ja existe no banco.
-        const response = await fetch(`/api/videoconferencias/${editingId}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(conferenceToApi(trimmedData)),
-        })
-
-        const result = await response.json()
-
-        if (!response.ok) {
-          setMessage(result.error || 'Nao foi possivel atualizar a videoconferencia.')
-          return
-        }
-
-        await fetchConferences()
-        notifyAgendaChanged()
-        setMessage('Videoconferencia atualizada com sucesso.')
-      } else {
-        // POST cria uma videoconferencia nova diretamente como aprovada.
-        const response = await fetch('/api/videoconferencias', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(conferenceToApi(trimmedData)),
-        })
-
-        const result = await response.json()
-
-        if (!response.ok) {
-          setMessage(result.error || 'Nao foi possivel adicionar a videoconferencia.')
-          return
-        }
-
-        await fetchConferences()
-        notifyAgendaChanged()
-        setMessage('Videoconferencia adicionada com sucesso.')
-      }
-
-      resetForm()
-    } catch (error) {
-      setMessage(error.message || 'Erro ao salvar videoconferencia.')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
   const handleEdit = (conference) => {
     setPresentationMode(false)
-    setEditingId(conference.id)
-    setFormData({
-      name: conference.name,
-      platform: conference.platform,
-      date: conference.date,
-      endDate: conference.endDate || '',
-      time: conference.time,
-      priority: conference.priority,
-      responsible: conference.responsible || '',
-      department: conference.department || '',
-      link: conference.link || '',
-      notes: conference.notes || '',
-      recurrenceType: 'none',
-      repeatUntil: '',
-    })
-    setErrors({})
-    setMessage('Modo de edicao ativado.')
-    requestAnimationFrame(() =>
-      window.scrollTo({ top: 0, behavior: 'smooth' }),
-    )
+    navigate(`/admin/cadastro/${conference.id}`)
   }
 
   const handleImportJson = async (event) => {
@@ -352,18 +249,6 @@ function ApprovedAgenda() {
           </div>
         )}
 
-        {!presentationMode && (
-          <ConferenceForm
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-            isEditing={Boolean(editingId)}
-            onSubmit={handleSubmit}
-            onCancelEdit={resetForm}
-            isSaving={isSaving}
-          />
-        )}
-
         <section className="agenda-panel">
           <div className="agenda-heading">
             <div>
@@ -376,6 +261,16 @@ function ApprovedAgenda() {
               )}
             </div>
             <div className="agenda-tools no-print">
+              {!presentationMode && (
+                <button
+                  className="button primary"
+                  type="button"
+                  onClick={() => navigate('/admin/cadastro')}
+                >
+                  <PlusCircle size={17} />
+                  Novo cadastro
+                </button>
+              )}
               <button
                 className="button secondary presentation-toggle"
                 type="button"

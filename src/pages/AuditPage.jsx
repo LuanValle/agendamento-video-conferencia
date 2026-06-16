@@ -1,22 +1,15 @@
-import { Download, RefreshCw } from 'lucide-react'
+import { Download, RefreshCw, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { exportAuditAgendaCsv, exportAuditLogsCsv } from '../utils/auditExportUtils'
 
-const todayIso = () => new Date().toISOString().slice(0, 10)
-
-const firstDayOfMonthIso = () => {
-  const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
-}
-
 const actionLabels = {
-  aprovar_solicitacao: 'Aprovou solicitação',
-  rejeitar_solicitacao: 'Rejeitou solicitação',
-  criar_videoconferencia: 'Criou videoconferência',
-  editar_videoconferencia: 'Editou videoconferência',
-  concluir_videoconferencia: 'Marcou como concluída',
-  reabrir_videoconferencia: 'Reabriu videoconferência',
-  excluir_videoconferencia: 'Excluiu videoconferência',
+  aprovar_solicitacao: 'Aprovou solicitacao',
+  rejeitar_solicitacao: 'Rejeitou solicitacao',
+  criar_videoconferencia: 'Criou videoconferencia',
+  editar_videoconferencia: 'Editou videoconferencia',
+  concluir_videoconferencia: 'Marcou como concluida',
+  reabrir_videoconferencia: 'Reabriu videoconferencia',
+  excluir_videoconferencia: 'Excluiu videoconferencia',
 }
 
 const formatDateTime = (value) => {
@@ -26,6 +19,21 @@ const formatDateTime = (value) => {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value))
+}
+
+const formatDate = (value) => {
+  if (!value) return '--'
+
+  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' })
+    .format(new Date(`${String(value).slice(0, 10)}T12:00:00`))
+}
+
+const formatTime = (value) => String(value || '').slice(0, 5) || '--'
+
+const getAgendaDateText = (item) => {
+  const start = formatDate(item.data)
+  const end = item.data_fim ? formatDate(item.data_fim) : ''
+  return end && end !== start ? `${start} a ${end}` : start
 }
 
 const getLogTitle = (log) => {
@@ -42,13 +50,13 @@ const getLogDescription = (log) => {
     details.motivo_rejeicao ? `Motivo: ${details.motivo_rejeicao}` : '',
   ].filter(Boolean)
 
-  return parts.join(' • ')
+  return parts.join(' - ')
 }
 
 function AuditPage() {
   const [filters, setFilters] = useState({
-    inicio: firstDayOfMonthIso(),
-    fim: todayIso(),
+    inicio: '',
+    fim: '',
   })
   const [agenda, setAgenda] = useState([])
   const [logs, setLogs] = useState([])
@@ -74,7 +82,8 @@ function AuditPage() {
       setLoading(true)
       setError('')
 
-      const response = await fetch(`/api/auditoria?${queryString}`)
+      const url = queryString ? `/api/auditoria?${queryString}` : '/api/auditoria'
+      const response = await fetch(url)
       const result = await response.json()
 
       if (!response.ok) {
@@ -108,15 +117,22 @@ function AuditPage() {
     }))
   }
 
+  const clearFilters = () => {
+    setFilters({
+      inicio: '',
+      fim: '',
+    })
+  }
+
   return (
     <section>
       <div className="section-heading">
         <div>
           <p className="eyebrow">Auditoria</p>
-          <h1>Relatórios administrativos</h1>
+          <h1>Relatorios administrativos</h1>
           {lastUpdatedAt && (
             <span className="last-updated">
-              Atualizado às {lastUpdatedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              Atualizado as {lastUpdatedAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
         </div>
@@ -148,6 +164,15 @@ function AuditPage() {
           </label>
           <div className="audit-actions">
             <button
+              className="button ghost"
+              type="button"
+              onClick={clearFilters}
+              disabled={!filters.inicio && !filters.fim}
+            >
+              <X size={17} />
+              Todos os periodos
+            </button>
+            <button
               className="button primary"
               type="button"
               onClick={() => exportAuditAgendaCsv(agenda, filters)}
@@ -163,7 +188,7 @@ function AuditPage() {
               disabled={!logs.length}
             >
               <Download size={17} />
-              Exportar ações CSV
+              Exportar acoes CSV
             </button>
           </div>
         </div>
@@ -171,11 +196,11 @@ function AuditPage() {
 
       <section className="audit-summary" aria-label="Resumo da auditoria">
         <article>
-          <span>VCs no período</span>
+          <span>VCs no relatorio</span>
           <strong>{summary.total}</strong>
         </article>
         <article>
-          <span>Concluídas</span>
+          <span>Concluidas</span>
           <strong>{summary.concluidas}</strong>
         </article>
         <article>
@@ -188,11 +213,51 @@ function AuditPage() {
         </article>
       </section>
 
-      <section className="panel audit-panel" aria-label="Ações administrativas">
+      <section className="panel audit-panel" aria-label="Videoconferencias do relatorio">
         <div className="section-heading compact-heading">
           <div>
-            <p className="eyebrow">Histórico</p>
-            <h2>Ações registradas</h2>
+            <p className="eyebrow">Agenda auditada</p>
+            <h2>Videoconferencias do relatorio</h2>
+          </div>
+          <span className="audit-count">{agenda.length} registros</span>
+        </div>
+
+        {loading && <div className="state-box">Carregando videoconferencias...</div>}
+
+        {!loading && !agenda.length && (
+          <div className="state-box">Nenhuma videoconferencia encontrada nesse periodo.</div>
+        )}
+
+        {!loading && agenda.length > 0 && (
+          <div className="audit-log-list">
+            {agenda.map((item) => (
+              <article className="audit-log-item audit-agenda-item" key={item.id}>
+                <div>
+                  <strong>{item.nome}</strong>
+                  <span>{getAgendaDateText(item)} - {formatTime(item.horario)}</span>
+                </div>
+                <p>
+                  {item.plataforma}
+                  {item.responsavel ? ` - ${item.responsavel}` : ''}
+                  {item.setor ? ` - ${item.setor}` : ''}
+                </p>
+                <small>
+                  {item.concluida ? 'Concluida' : 'Pendente'}
+                  {' - '}
+                  {item.link ? 'Com link' : 'Sem link'}
+                  {item.solicitacao_id ? ` - Solicitacao ${item.solicitacao_id}` : ' - Cadastro manual'}
+                </small>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="panel audit-panel" aria-label="Acoes administrativas">
+        <div className="section-heading compact-heading">
+          <div>
+            <p className="eyebrow">Historico</p>
+            <h2>Acoes registradas</h2>
           </div>
           <span className="audit-count">{logs.length} registros</span>
         </div>
@@ -200,7 +265,7 @@ function AuditPage() {
         {loading && <div className="state-box">Carregando auditoria...</div>}
 
         {!loading && !logs.length && (
-          <div className="state-box">Nenhuma ação administrativa registrada nesse período.</div>
+          <div className="state-box">Nenhuma acao administrativa registrada nesse periodo. Os logs passam a contar depois que a auditoria foi ativada.</div>
         )}
 
         {!loading && logs.length > 0 && (
@@ -209,7 +274,7 @@ function AuditPage() {
               <article className="audit-log-item" key={log.id}>
                 <div>
                   <strong>{actionLabels[log.acao] || log.acao}</strong>
-                  <span>{formatDateTime(log.criado_em)} • {log.usuario || 'admin'}</span>
+                  <span>{formatDateTime(log.criado_em)} - {log.usuario || 'admin'}</span>
                 </div>
                 <p>{getLogTitle(log)}</p>
                 {getLogDescription(log) && <small>{getLogDescription(log)}</small>}

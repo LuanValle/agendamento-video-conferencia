@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useState } from 'react'
 import Dashboard from '../components/Dashboard'
-import { apiToRequest } from '../utils/apiMappers'
+import { apiToConference, apiToRequest } from '../utils/apiMappers'
+import { isToday } from '../utils/dateUtils'
 import { getRequestSummary } from '../utils/requestUtils'
-import { REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
+import { AGENDA_CHANGED_EVENT, REQUESTS_CHANGED_EVENT, subscribeRealtimeEvent } from '../utils/realtimeEvents'
 import { useSmartPolling } from '../utils/useSmartPolling'
 
 function AdminDashboard() {
@@ -27,23 +28,39 @@ function AdminDashboard() {
     try {
       setError('')
 
-      // Busca as solicitacoes no banco para montar os numeros do painel.
-      const response = await fetch('/api/solicitacoes')
-      const result = await response.json()
+      // Busca solicitacoes e agenda para montar os numeros do painel.
+      const [requestsResponse, conferencesResponse] = await Promise.all([
+        fetch('/api/solicitacoes'),
+        fetch('/api/videoconferencias'),
+      ])
+      const [requestsResult, conferencesResult] = await Promise.all([
+        requestsResponse.json(),
+        conferencesResponse.json(),
+      ])
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Nao foi possivel carregar o painel.')
+      if (!requestsResponse.ok) {
+        throw new Error(requestsResult.error || 'Nao foi possivel carregar o painel.')
       }
 
-      const requests = (result.data || []).map(apiToRequest)
-      const nextSummary = getRequestSummary(requests)
+      if (!conferencesResponse.ok) {
+        throw new Error(conferencesResult.error || 'Nao foi possivel carregar a agenda do painel.')
+      }
+
+      const requests = (requestsResult.data || []).map(apiToRequest)
+      const conferences = (conferencesResult.data || []).map(apiToConference)
+      const requestSummary = getRequestSummary(requests)
+      const conferencesToday = conferences.filter((conference) => isToday(conference.date, conference.endDate)).length
+      const nextSummary = {
+        ...requestSummary,
+        today: conferencesToday,
+      }
 
       setSummary(nextSummary)
       setStatus({
         database: 'conectado',
         lastUpdatedAt: new Date(),
-        pending: nextSummary.pending,
-        today: nextSummary.today,
+        pending: requestSummary.pending,
+        today: requestSummary.today,
       })
     } catch (error) {
       setError(error.message)
@@ -58,7 +75,13 @@ function AdminDashboard() {
 
   useEffect(() => {
     const refreshSummary = () => fetchSummary()
-    return subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshSummary)
+    const unsubscribeRequests = subscribeRealtimeEvent(REQUESTS_CHANGED_EVENT, refreshSummary)
+    const unsubscribeAgenda = subscribeRealtimeEvent(AGENDA_CHANGED_EVENT, refreshSummary)
+
+    return () => {
+      unsubscribeRequests()
+      unsubscribeAgenda()
+    }
   }, [fetchSummary])
 
   return (

@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Home, Inbox, LayoutDashboard, List, LogOut, Menu, PanelLeftClose, PlusCircle, XCircle } from 'lucide-react'
+import { CalendarDays, FileText, Inbox, LayoutDashboard, List, LogOut, Menu, PanelLeftClose, PlusCircle, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import ConfirmModal from '../components/ConfirmModal'
@@ -107,7 +107,7 @@ function AdminLayout() {
   return (
     <div className={isSidebarHidden ? 'admin-shell sidebar-hidden' : 'admin-shell'}>
       {!isSidebarHidden && (
-      <aside className="admin-sidebar">
+        <aside className="admin-sidebar">
         <div className="admin-sidebar-header">
           <div>
             <p className="eyebrow">Administração</p>
@@ -158,16 +158,12 @@ function AdminLayout() {
             <List size={18} />
             Todas
           </NavLink>
-          <NavLink to="/">
-            <Home size={18} />
-            Início
-          </NavLink>
         </nav>
         <button className="button secondary" type="button" onClick={handleLogout}>
           <LogOut size={17} />
           Sair
         </button>
-      </aside>
+        </aside>
       )}
       <main className="admin-content">
         {isSidebarHidden && (

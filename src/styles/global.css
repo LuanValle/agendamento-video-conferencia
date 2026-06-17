@@ -444,6 +444,10 @@ button {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.admin-shell.sidebar-hidden .admin-content {
+  padding-top: 76px;
+}
+
 .admin-sidebar {
   position: sticky;
   top: 0;
@@ -491,8 +495,12 @@ button {
 }
 
 .sidebar-restore-button {
-  margin-bottom: 18px;
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 30;
   padding: 10px 13px;
+  box-shadow: 0 12px 28px rgba(27, 39, 58, 0.14);
 }
 
 .sidebar-toggle-button:hover,

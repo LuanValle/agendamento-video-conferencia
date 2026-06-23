@@ -39,6 +39,19 @@ const invalidRequest = await request('/api/solicitacoes', {
 })
 assert(invalidRequest.status === 400, `Esperava validacao 400 ao criar solicitacao vazia, recebeu ${invalidRequest.status}`)
 
+const invalidTracking = await request('/api/acompanhamento?tipo=nip&valor=123')
+assert(invalidTracking.status === 400, `Esperava validacao 400 para NIP incompleto, recebeu ${invalidTracking.status}`)
+
+const tracking = await request('/api/acompanhamento?tipo=nip&valor=99.9999.99&pagina=1')
+assert(tracking.status === 200, `Esperava acompanhamento 200, recebeu ${tracking.status}`)
+assert(Array.isArray(tracking.body?.data), 'Acompanhamento deve retornar data como array.')
+assert(tracking.body?.data.length <= 10, 'Acompanhamento deve limitar a pagina a 10 resultados.')
+assert(tracking.body?.meta?.pageSize === 10, 'Acompanhamento deve informar pageSize igual a 10.')
+assert(
+  tracking.body?.data.every((item) => !Object.prototype.hasOwnProperty.call(item, 'link')),
+  'Acompanhamento publico nao deve expor o link da videoconferencia.',
+)
+
 const adminUser = process.env.ADMIN_USER
 const adminPassword = process.env.ADMIN_PASSWORD
 const adminSessionSecret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD

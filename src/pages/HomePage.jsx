@@ -1,4 +1,4 @@
-import { CalendarPlus } from 'lucide-react'
+import { CalendarPlus, SearchCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import sisvcLogo from '../assets/sisvc-logo.jpg'
 
@@ -15,7 +15,11 @@ function HomePage() {
         <div className="entry-actions entry-actions-primary">
           <Link className="entry-action-card" to="/solicitar">
             <CalendarPlus size={20} />
-            <span>Solicitar videoconferencia</span>
+            <span>Solicitar videoconferência</span>
+          </Link>
+          <Link className="entry-action-card entry-action-secondary" to="/acompanhar">
+            <SearchCheck size={20} />
+            <span>Acompanhar videoconferências</span>
           </Link>
           <Link className="entry-login-link" to="/admin/login">
             Login administrativo

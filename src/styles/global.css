@@ -574,6 +574,38 @@ button {
   background: #f8fbfd;
 }
 
+.tracking-table tbody .tracking-row-pendente,
+.tracking-table tbody .tracking-row-pendente:hover {
+  background: #fff6df;
+}
+
+.tracking-table tbody .tracking-row-aprovada,
+.tracking-table tbody .tracking-row-aprovada:hover {
+  background: #eaf5fc;
+}
+
+.tracking-table tbody .tracking-row-concluida,
+.tracking-table tbody .tracking-row-concluida:hover {
+  background: #e9f8ef;
+}
+
+.tracking-row-pendente td:first-child {
+  border-left: 5px solid #d99000;
+}
+
+.tracking-row-aprovada td:first-child {
+  border-left: 5px solid #1769aa;
+}
+
+.tracking-row-concluida td:first-child {
+  border-left: 5px solid #16805a;
+}
+
+.tracking-row-aprovada .situation-aprovada {
+  background: #d9ecf9;
+  color: #0d4f86;
+}
+
 .tracking-pagination {
   color: #667085;
 }

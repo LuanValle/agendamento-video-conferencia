@@ -167,7 +167,10 @@ function ConferenceTracking() {
                   </thead>
                   <tbody>
                     {results.map((conference) => (
-                      <tr key={conference.id}>
+                      <tr
+                        key={conference.id}
+                        className={`tracking-row tracking-row-${conference.status}`}
+                      >
                         <td data-label="Videoconferência">{conference.nome_videoconferencia}</td>
                         <td data-label="NIP do solicitante">{conference.nip}</td>
                         <td data-label="Responsável">{conference.responsavel}</td>

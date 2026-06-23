@@ -82,7 +82,7 @@ export default async function handler(request, response) {
                 s.nip,
                 COALESCE(v.responsavel, s.nome) AS responsavel,
                 s.data,
-                COALESCE(v.local_fisico, s.local_fisico, s.local_plataforma) AS local,
+                COALESCE(v.local_fisico, s.local_fisico) AS local,
                 CASE
                     WHEN COALESCE(v.concluida, false) THEN 'concluida'
                     WHEN s.status = 'aprovada' THEN 'aprovada'

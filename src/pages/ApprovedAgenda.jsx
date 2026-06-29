@@ -7,7 +7,7 @@ import Dashboard from '../components/Dashboard'
 import ExportActions from '../components/ExportActions'
 import Filters from '../components/Filters'
 import SearchBar from '../components/SearchBar'
-import { apiToConference, conferenceToApi } from '../utils/apiMappers'
+import { apiToConference } from '../utils/apiMappers'
 import {
   getSituation,
   isToday,
@@ -169,7 +169,6 @@ function ApprovedAgenda() {
   }
 
   const updateConferenceCompletion = async (id, completed) => {
-    // Como a API de PATCH recebe o registro inteiro, primeiro pegamos os dados atuais.
     const conference = conferences.find((item) => item.id === id)
 
     if (!conference) {
@@ -180,18 +179,14 @@ function ApprovedAgenda() {
     try {
       setMessage('')
 
-      // Monta uma copia da videoconferencia alterando apenas o campo completed.
-      const updatedConference = {
-        ...conference,
-        completed,
-      }
-
       const response = await fetch(`/api/videoconferencias/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(conferenceToApi(updatedConference)),
+        // A API recebe apenas o status neste fluxo. Isso permite concluir uma
+        // videoconferencia vencida sem permitir a edicao de seus demais dados.
+        body: JSON.stringify({ concluida: completed }),
       })
 
       const result = await response.json()
